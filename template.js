@@ -3,9 +3,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     size(800, 600);
     frameRate(60);
 
-    var state = "opening";
-
-    /* OPENING SCREEN AREA */
+    var state = "menu";
 
     var a = random(1500);
     var mountains = [[],[],[]];
@@ -27,50 +25,19 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         for (var x = 0; x <= 800; x += 8) {
             var n2 = 0;
             for (var y = 0; y <= ymin; y += 8) {
-                var c = map(noise(n1, n2), 0, 2, 0, 255);
+                var c = map(noise(n1, n2), 0, 1, 0, 255);
                 fill(c, c, c , 150);
                 rect(x, y, 8, 8);
                 n2 += 0.05; // step size in noise
             }
             n1 += 0.02; // step size in noise
         }
-        a -= 0.01;  // speed of clouds
+        a -= 0.005;  // speed of clouds
     };
 
     var towerImg = loadImage("./images/tower.png");
     var drawTower = function() {
         image(towerImg,250,100);
-    };
-
-    var fogObj = function(x,y) {
-        this.x = x;
-        this.y = y;
-        this.speed = 0.1;
-    };
-
-    var fogImg = loadImage("./images/fog.png");
-    fogObj.prototype.draw = function(){
-        image(fogImg,this.x,this.y);
-        if (this.x > 0 || this.x < -800){
-            this.speed *= -1;
-        }
-        this.x += this.speed;
-    };
-
-    var fog = new fogObj(-800,0);
-
-    var drawFirstOpen = function(fade) {
-        fill(0,0,0);
-        rect(0,0,800,600);
-        fill(200,200,200,fade);
-        textSize(64);
-        textAlign(CENTER);
-        text("A Game by",400,200);
-        text("Brad\nFerguson", 220,300);
-        text("Sean\nJocher", 600,300);
-        textSize(128);
-        text("&", 420,350);
-        textAlign(LEFT);
     };
 
     var drawOpening = function() {
@@ -82,44 +49,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 quad(y*10,mountains[x][y]+x*55,(y+1)*10,mountains[x][y+1]+(x)*55,(y+1)*10,600,y*10,800);
             }
         }
-        fog.draw();
         drawTower();
-        //fill(160,160,160,90);
-        //rect(0,0,800,600);
     };
-
-    var openingObj = function(state) {
-        this.state = state;
-        this.fade = 0;
-        this.peak = false;
-    };
-
-    openingObj.prototype.draw = function() {
-        switch(this.state){
-            case 0:
-                drawFirstOpen(this.fade);
-                if(this.fade < 255 && !this.peak){this.fade++;}
-                if(this.fade === 255){this.peak = true;}
-                if(this.fade > 0 && this.peak){this.fade--;}
-                if(this.fade === 0 && this.peak){this.state = 1; this.fade = 255;}
-                break;
-            case 1:
-                drawOpening();
-                fill(0,0,0,this.fade);
-                rect(0,0,800,600);
-                if(this.fade > 0){this.fade--;}
-                if(this.fade === 0){
-                    //DRAW TITLE AND PRESS ENTER
-                }
-                break;
-
-
-        }
-    };
-
-    var opening = new openingObj(0);
-
-    /* OPENING SCREEN END*/
 
     /* MENU SCREEN AREA */
 
@@ -147,13 +78,11 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var creditsButton = new buttonMenuObj(300, 420, "unselected", "Credits");
     var exitButton = new buttonMenuObj(300, 480, "unselected", "Exit Game");
 
-    var swordImg = loadImage("./images/sword.png");
     var selectorMenuObj = function(x, y) {
         this.x = x;
         this.y = y;
         fill(181, 41, 20);
-        image(swordImg,this.x-30,this.y);
-        //triangle(this.x, this.y, this.x + 30, this.y + 15, this.x, this.y + 30);
+        triangle(this.x, this.y, this.x + 30, this.y + 15, this.x, this.y + 30);
     }
 
     var cycleMenu = function(state) {
@@ -239,7 +168,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var draw = function() {
         switch(state){
             case "opening":
-                opening.draw();
+                drawOpening();
                 break;
             case "menu":
                 menu.draw();
