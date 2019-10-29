@@ -4,6 +4,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     frameRate(60);
 
     var state = "opening";
+
     /* OPENING SCREEN AREA */
 
 
@@ -136,16 +137,16 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         } else if(this.state == "unselected") {
             fill(34, 34, 36);
         }
-        rect(this.x, this.y, 300, 50, 25);
+        rect(this.x, this.y, 280, 50, 25);
         fill(255,255,255);
         textSize(32);
         text(this.textOption, this.x + 64, this.y + 36);
     }
 
-    var startButton = new buttonMenuObj(300, 300, "unselected", "Start Game");
-    var instructionsButton = new buttonMenuObj(300, 360, "unselected", "Instructions");
-    var creditsButton = new buttonMenuObj(300, 420, "unselected", "Credits");
-    var exitButton = new buttonMenuObj(300, 480, "unselected", "Exit Game");
+    var startButton = new buttonMenuObj(260, 260, "unselected", "Start Game");
+    var instructionsButton = new buttonMenuObj(260, 320, "unselected", "Instructions");
+    var creditsButton = new buttonMenuObj(260, 380, "unselected", "Credits");
+    var exitButton = new buttonMenuObj(260, 440, "unselected", "Exit Game");
 
     var swordImg = loadImage("./images/sword.png");
     var selectorMenuObj = function(x, y) {
