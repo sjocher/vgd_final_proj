@@ -57,53 +57,108 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.state = state;
         this.x = x;
         this.y = y;
+        this.textOption = textOption;
+    }
+    
+    buttonMenuObj.prototype.draw = function () {
         if(this.state == "selected") {
-            fill(34, 34, 36);
-            rect(this.x - 5, this.y, 310, 60, 25);
+            fill(255, 34, 36);
         } else if(this.state == "unselected") {
             fill(34, 34, 36);
-            rect(this.x, this.y, 300, 50, 25);
         }
+        rect(this.x, this.y, 300, 50, 25);
         fill(255,255,255);
-        this.textOption = textOption;
         textSize(32);
-        text(textOption, this.x + 64, this.y + 32);
+        text(this.textOption, this.x + 64, this.y + 36);
     }
 
-    var cycleMenu = function(state, startButton, instructionsButton, creditsButton, exitButton) {
+    var startButton = new buttonMenuObj(300, 300, "unselected", "Start Game");
+    var instructionsButton = new buttonMenuObj(300, 360, "unselected", "Instructions");
+    var creditsButton = new buttonMenuObj(300, 420, "unselected", "Credits");
+    var exitButton = new buttonMenuObj(300, 480, "unselected", "Exit Game");
+
+    var selectorMenuObj = function(x, y) {
+        this.x = x;
+        this.y = y;
+        fill(181, 41, 20);
+        triangle(this.x, this.y, this.x + 30, this.y + 15, this.x, this.y + 30);
+    }
+
+    var cycleMenu = function(state) {
         switch(state) {
             case 0:
                 startButton.state = "selected";
+                instructionsButton.state = "unselected"
+                creditsButton.state = "unselected"
+                exitButton.state = "unselected"
+                var arrow = new selectorMenuObj(startButton.x - 100, startButton.y + 8);
                 break;
             case 1:
                 instructionsButton.state = "selected";
+                startButton.state = "unselected";
+                creditsButton.state = "unselected"
+                exitButton.state = "unselected"
+                var arrow = new selectorMenuObj(instructionsButton.x - 100, instructionsButton.y + 8);
                 break;
             case 2:
                 creditsButton.state = "selected";
+                startButton.state = "unselected";
+                instructionsButton.state = "unselected"
+                exitButton.state = "unselected"
+                var arrow = new selectorMenuObj(creditsButton.x - 100, creditsButton.y + 8);
                 break;
             case 3:
                 exitButton.state = "selected";
+                startButton.state = "unselected";
+                instructionsButton.state = "unselected"
+                creditsButton.state = "unselected"
+                var arrow = new selectorMenuObj(exitButton.x - 100, exitButton.y + 8);
                 break;
         }
     };
 
-    var drawMenuOptions = function() {
-        this.state = 0;
-        var startButton = new buttonMenuObj(300, 300, "unselected", "Start Game");
-        var instructionsButton = new buttonMenuObj(300, 360, "unselected", "Instructions");
-        var creditsButton = new buttonMenuObj(300, 420, "unselected", "Credits");
-        var exitButton = new buttonMenuObj(300, 480, "unselected", "Exit Game");
-        cycleMenu(0, startButton, instructionsButton, creditsButton, exitButton);
+    var drawMenuOptions = function(state) {
+        cycleMenu(state);
+        startButton.draw();
+        instructionsButton.draw();
+        creditsButton.draw();
+        exitButton.draw();
     };
 
-    var drawMenu = function () {
+    var menu = function(state) {
+        this.state = state;
+    }
+
+    menu.prototype.draw = function() {
         //Setup background for the menu
         drawOpening();
         //Setup Menu Options
-        drawMenuOptions();
+        drawMenuOptions(this.state);
     };
 
-    /* Main Draw Function */
+    var menu = new menu(0);
+
+    /* Main Draw and Key Input Area */
+
+    var keyPressed = function() {
+        switch(state) {
+            case "menu":
+                if(keyCode == UP) {
+                    if(menu.state == 0) {
+                        menu.state = 3;
+                    } else {
+                        menu.state--;
+                    }
+                } else if(keyCode == DOWN) {
+                    if(menu.state == 3) {
+                        menu.state = 0;
+                    } else {
+                        menu.state++;
+                    }
+                }
+                break;
+        }
+    }
 
     var draw = function() {
         switch(state){
@@ -111,7 +166,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 drawOpening();
                 break;
             case "menu":
-                drawMenu();
+                menu.draw();
                 break;
             case "game":
                 break;
