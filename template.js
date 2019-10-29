@@ -1,4 +1,5 @@
 var sketchProc=function(processingInstance){ with (processingInstance) {
+
     size(800, 600);
     frameRate(60);
 
@@ -34,9 +35,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         a -= 0.005;  // speed of clouds
     };
 
+    var towerImg = loadImage("./images/tower.png");
     var drawTower = function() {
-
-
+        image(towerImg,250,100);
     };
 
     var drawOpening = function() {
