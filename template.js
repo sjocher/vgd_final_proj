@@ -3,7 +3,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     size(800, 600);
     frameRate(60);
 
-    var state = "menu";
+    var state = "opening";
 
     var a = random(1500);
     var mountains = [[],[],[]];
@@ -63,7 +63,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     
     buttonMenuObj.prototype.draw = function () {
         if(this.state == "selected") {
-            fill(255, 34, 36);
+            fill(181, 41, 20);
         } else if(this.state == "unselected") {
             fill(34, 34, 36);
         }
@@ -160,6 +160,20 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                     } else {
                         menu.state++;
                     }
+                }
+                if(keyCode == ENTER) {
+                    switch(menu.state) {
+                        case 0:
+                            break;
+                        case 1:
+                            break;
+                        case 2:
+                            break;
+                        case 3:
+                            state = "opening";
+                            break;
+                    }
+                    menu.state = 0;
                 }
                 break;
         }
