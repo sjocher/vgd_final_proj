@@ -210,6 +210,18 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     var menu = new menu(0);
 
+    /* Credits Area */
+
+    var drawCredits = function () {
+        background(0,0,0);
+    }
+    
+    /* Instructions Area */
+
+    var drawInstructions = function () {
+        background(0,0,0);
+    }
+    
     /* Main Draw and Key Input Area */
 
     var keyPressed = function() {
@@ -237,8 +249,10 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                         case 0:
                             break;
                         case 1:
+                            state = "instructions";
                             break;
                         case 2:
+                            state = "credits";
                             break;
                         case 3:
                             state = "opening";
@@ -247,6 +261,17 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                     menu.state = 0;
                 }
                 break;
+            case "credits":
+                if(keyCode == ENTER) {
+                    state = "menu";
+                }
+                break;
+            case "instructions":
+                if(keyCode == ENTER) {
+                    state = "menu";
+                }
+                break;
+
         }
     }
 
@@ -257,6 +282,12 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 break;
             case "menu":
                 menu.draw();
+                break;
+            case "credits":
+                drawCredits();
+                break;
+            case "instructions":
+                drawInstructions();
                 break;
             case "game":
                 break;
