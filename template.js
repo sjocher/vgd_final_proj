@@ -3,7 +3,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     size(800, 600);
     frameRate(60);
 
-    var state = "opening";
+    var state = "menu";
 
     var a = random(1500);
     var mountains = [[],[],[]];
@@ -143,6 +143,10 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     var keyPressed = function() {
         switch(state) {
+            case "opening":
+                if(keyCode == ENTER) {
+                    state = "menu";
+                }
             case "menu":
                 if(keyCode == UP) {
                     if(menu.state == 0) {
