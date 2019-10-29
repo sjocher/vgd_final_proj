@@ -34,12 +34,12 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         a -= 0.005;  // speed of clouds
     };
 
-    var drawTower = function(){
+    var drawTower = function() {
 
 
     };
 
-    var drawOpening = function(){
+    var drawOpening = function() {
         drawSky(250);
         for (x=0; x<=2; x++) {
             for (var y=0; y<=80; y++) {
@@ -49,8 +49,61 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             }
         }
         drawTower();
-
     };
+
+    /* MENU SCREEN AREA */
+
+    var buttonMenuObj = function(x, y, state, textOption) {
+        this.state = state;
+        this.x = x;
+        this.y = y;
+        if(this.state == "selected") {
+            fill(34, 34, 36);
+            rect(this.x - 5, this.y, 310, 60, 25);
+        } else if(this.state == "unselected") {
+            fill(34, 34, 36);
+            rect(this.x, this.y, 300, 50, 25);
+        }
+        fill(255,255,255);
+        this.textOption = textOption;
+        textSize(32);
+        text(textOption, this.x + 64, this.y + 32);
+    }
+
+    var cycleMenu = function(state, startButton, instructionsButton, creditsButton, exitButton) {
+        switch(state) {
+            case 0:
+                startButton.state = "selected";
+                break;
+            case 1:
+                instructionsButton.state = "selected";
+                break;
+            case 2:
+                creditsButton.state = "selected";
+                break;
+            case 3:
+                exitButton.state = "selected";
+                break;
+        }
+    };
+
+    var drawMenuOptions = function() {
+        this.state = 0;
+        var startButton = new buttonMenuObj(300, 300, "unselected", "Start Game");
+        var instructionsButton = new buttonMenuObj(300, 360, "unselected", "Instructions");
+        var creditsButton = new buttonMenuObj(300, 420, "unselected", "Credits");
+        var exitButton = new buttonMenuObj(300, 480, "unselected", "Exit Game");
+        cycleMenu(0, startButton, instructionsButton, creditsButton, exitButton);
+    };
+
+    var drawMenu = function () {
+        //Setup background for the menu
+        drawOpening();
+        //Setup Menu Options
+        drawMenuOptions();
+    };
+
+    /* Main Draw Function */
 
     var draw = function() {
         switch(state){
@@ -58,6 +111,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 drawOpening();
                 break;
             case "menu":
+                drawMenu();
                 break;
             case "game":
                 break;
