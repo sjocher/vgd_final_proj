@@ -39,7 +39,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     }
 
     var drawSky = function(ymin){
-        background(3, 102, 242);
+        //background(3, 102, 242);
+        background(15,46,89);
         noStroke();
 
         // sky
@@ -103,8 +104,6 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         //ellipse(this.position.x, this.position.y, this.size, this.size*2);
     };
 
-
-
     var drawFirstOpen = function(fade) {
         fill(0,0,0);
         rect(0,0,800,600);
@@ -119,6 +118,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         textAlign(LEFT);
     };
 
+    var titleImg = loadImage("./images/title.png");
     var drawOpening = function() {
         drawSky(250);
         for (x=0; x<=2; x++) {
@@ -150,6 +150,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             }
         }
         drawTower();
+        image(titleImg,50,25);
         //fill(160,160,160,90);
         //rect(0,0,800,600);
     };
@@ -158,6 +159,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.state = state;
         this.fade = 0;
         this.peak = false;
+        this.showEnter = 0;
+        this.currFrame = 0;
     };
 
     openingObj.prototype.draw = function() {
@@ -175,7 +178,25 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 rect(0,0,800,600);
                 if(this.fade > 0){this.fade--;}
                 if(this.fade === 0){
-                    //DRAW TITLE AND PRESS ENTER
+                    //PRESS ENTER
+                    if (this.showEnter === 1) {
+                        textAlign(CENTER);
+                        fill(255,255,255);
+                        textSize(32);
+                        text("Press Enter", 400,500);
+                        textAlign(LEFT);
+                        if (this.currFrame < (frameCount - 60)) {
+                            this.currFrame = frameCount;
+                            this.showEnter = 0;
+                        }
+                    }
+                    else {
+                        if (this.currFrame < (frameCount - 30)) {
+                            this.currFrame = frameCount;
+                            this.showEnter = 1;
+                        }
+                    }
+
                 }
                 break;
 
@@ -274,7 +295,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         drawMenuOptions(this.state);
     };
 
-    var menu = new menu(0);
+    var menu = new menu(-1);
 
     /* Credits Area */
 
@@ -318,7 +339,12 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 }
                 if(keyCode == ENTER) {
                     switch(menu.state) {
+                        case -1:
+                            menu.state = 0;
+                            break;
                         case 0:
+                            state = "game";
+                            rainSound.stop();
                             break;
                         case 1:
                             state = "instructions";
@@ -334,7 +360,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                             else if (soundBool === -1){soundButton.textOption = "Sound: OFF";}
                             break;
                     }
-                    menu.state = 0;
+                    //menu.state = 0;
                 }
                 break;
             case "credits":
