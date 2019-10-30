@@ -4,6 +4,25 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     frameRate(60);
 
     var state = "opening";
+    var soundBool = 1;
+
+    /* SOUNDS */
+    var sound = function(src){
+        this.sound = document.createElement("audio");
+        this.sound.src = src;
+        this.sound.setAttribute("preload", "auto");
+        this.sound.setAttribute("controls", "none");
+        this.sound.style.display = "none";
+        document.body.appendChild(this.sound);
+        this.play = function(){
+            this.sound.play();
+        }
+        this.stop = function() {
+            this.sound.pause();
+        }
+    };
+    var rainSound = new sound("./sounds/rain.wav");
+    var clickSound = new sound("./sounds/click.wav");
 
     /* OPENING SCREEN AREA */
 
@@ -60,6 +79,32 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     var fog = new fogObj(-800,0);
 
+    var rainObj = function(x, y) {
+        this.position = new PVector(x, y);
+        this.velocity = new PVector(0, random(3, 7));
+        this.size = random(5,12);
+        this.position.y -= (18 - this.size);
+        this.timeLeft = 255;
+    };
+
+    var rain = [];
+
+    rainObj.prototype.move = function() {
+        this.position.add(this.velocity);
+        this.timeLeft--;
+    };
+
+    rainObj.prototype.draw = function() {
+        noStroke();
+        //fill(this.c1, this.c1, this.c1, this.timeLeft);
+        stroke(183, 193, 240,this.timeLeft);
+        strokeWeight(1);
+        line(this.position.x,this.position.y,this.position.x,this.position.y+this.size);
+        //ellipse(this.position.x, this.position.y, this.size, this.size*2);
+    };
+
+
+
     var drawFirstOpen = function(fade) {
         fill(0,0,0);
         rect(0,0,800,600);
@@ -84,6 +129,26 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             }
         }
         fog.draw();
+        if (rain.length < 500) {
+            rain.push(new rainObj(random(0,800), 0));
+            rain.push(new rainObj(random(0,800), 0));
+            rain.push(new rainObj(random(0,800), 0));
+        }
+        for (var i=0; i<rain.length; i++) {
+            if ((rain[i].timeLeft > 0) && (rain[i].position.y < 600)) {
+                rain[i].draw();
+                rain[i].move();
+                if (soundBool === 1) {
+                    rainSound.play();
+                }
+                if (soundBool === -1){
+                    rainSound.stop();
+                }
+            }
+            else {
+                rain.splice(i, 1);
+            }
+        }
         drawTower();
         //fill(160,160,160,90);
         //rect(0,0,800,600);
@@ -146,7 +211,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var startButton = new buttonMenuObj(260, 260, "unselected", "Start Game");
     var instructionsButton = new buttonMenuObj(260, 320, "unselected", "Instructions");
     var creditsButton = new buttonMenuObj(260, 380, "unselected", "Credits");
-    var exitButton = new buttonMenuObj(260, 440, "unselected", "Exit Game");
+    var soundButton = new buttonMenuObj(260, 440, "unselected", "Sound: ON");
 
     var swordImg = loadImage("./images/sword.png");
     var selectorMenuObj = function(x, y) {
@@ -163,29 +228,29 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 startButton.state = "selected";
                 instructionsButton.state = "unselected"
                 creditsButton.state = "unselected"
-                exitButton.state = "unselected"
+                soundButton.state = "unselected"
                 var arrow = new selectorMenuObj(startButton.x - 100, startButton.y + 8);
                 break;
             case 1:
                 instructionsButton.state = "selected";
                 startButton.state = "unselected";
                 creditsButton.state = "unselected"
-                exitButton.state = "unselected"
+                soundButton.state = "unselected"
                 var arrow = new selectorMenuObj(instructionsButton.x - 100, instructionsButton.y + 8);
                 break;
             case 2:
                 creditsButton.state = "selected";
                 startButton.state = "unselected";
                 instructionsButton.state = "unselected"
-                exitButton.state = "unselected"
+                soundButton.state = "unselected"
                 var arrow = new selectorMenuObj(creditsButton.x - 100, creditsButton.y + 8);
                 break;
             case 3:
-                exitButton.state = "selected";
+                soundButton.state = "selected";
                 startButton.state = "unselected";
                 instructionsButton.state = "unselected"
                 creditsButton.state = "unselected"
-                var arrow = new selectorMenuObj(exitButton.x - 100, exitButton.y + 8);
+                var arrow = new selectorMenuObj(soundButton.x - 100, soundButton.y + 8);
                 break;
         }
     };
@@ -195,7 +260,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         startButton.draw();
         instructionsButton.draw();
         creditsButton.draw();
-        exitButton.draw();
+        soundButton.draw();
     };
 
     var menu = function(state) {
@@ -233,12 +298,18 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 }
             case "menu":
                 if(keyCode == UP) {
+                    if (soundBool === 1) {
+                        clickSound.play();
+                    }
                     if(menu.state == 0) {
                         menu.state = 3;
                     } else {
                         menu.state--;
                     }
                 } else if(keyCode == DOWN) {
+                    if (soundBool === 1) {
+                        clickSound.play();
+                    }
                     if(menu.state == 3) {
                         menu.state = 0;
                     } else {
@@ -251,12 +322,16 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                             break;
                         case 1:
                             state = "instructions";
+                            rainSound.stop();
                             break;
                         case 2:
                             state = "credits";
+                            rainSound.stop();
                             break;
                         case 3:
-                            state = "opening";
+                            soundBool *= -1;
+                            if (soundBool === 1){soundButton.textOption = "Sound: ON";}
+                            else if (soundBool === -1){soundButton.textOption = "Sound: OFF";}
                             break;
                     }
                     menu.state = 0;
