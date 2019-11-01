@@ -308,6 +308,12 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var ratImg = loadImage("./images/rat.png");
     var drawCredits = function () {
         background(0,0,0);
+        fill(255, 255, 255);
+        textSize(32);
+        //Authors Area
+        text("Thanks for Playing!", 260, 50);
+        text("Game by", 320, 80);
+        text("Brad Ferguson & Sean Jocher", 190, 120);
         image(acidImg, 0, 100, 100, 100);
         image(archerImg, 0, 200, 100, 100);
         image(eyeImg, 0, 300, 100, 100);
