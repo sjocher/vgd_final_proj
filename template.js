@@ -305,10 +305,19 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     
     /* Instructions Area */
 
+    var instructionImg = loadImage("./images/instructions.png");
     var drawInstructions = function () {
         background(0,0,0);
         fill(255,255,255);
-        text("Pussy", 50, 50);
+        textSize(64);
+        textAlign(CENTER);
+        text("Controls", 400, 70);
+        textSize(32);
+        text("WASD to Move", 400, 120);
+        text("Arrow Keys to Shoot", 400, 180);
+        image(instructionImg, 50, 200, 700, 250);
+        text("Press Enter to Return to Main Menu", 400, 550);
+        textAlign(LEFT);
     }
     
     /* Main Draw and Key Input Area */
@@ -345,8 +354,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                             menu.state = 0;
                             break;
                         case 0:
-                            state = "game";
-                            rainSound.stop();
+                            //state = "game";
+                            //rainSound.stop();
                             break;
                         case 1:
                             state = "instructions";
