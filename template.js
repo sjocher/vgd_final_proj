@@ -307,6 +307,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     var drawInstructions = function () {
         background(0,0,0);
+        fill(255,255,255);
+        text("Pussy", 50, 50);
     }
     
     /* Main Draw and Key Input Area */
