@@ -314,13 +314,13 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         text("Thanks for Playing!", 260, 50);
         text("Game by", 320, 80);
         text("Brad Ferguson & Sean Jocher", 190, 120);
-        image(acidImg, 0, 100, 100, 100);
-        image(archerImg, 0, 200, 100, 100);
-        image(eyeImg, 0, 300, 100, 100);
-        image(knightImg, 0, 400, 100, 100);
-        image(playerImg, 0, 500, 100, 100);
-        image(potionImg, 100, 500, 100, 100);
-        image(ratImg, 200, 500, 100, 100);
+        image(acidImg, 250, 300, 100, 100);
+        image(archerImg, 250, 200, 100, 100);
+        image(eyeImg, 250, 400, 100, 100);
+        image(knightImg, 450, 300, 100, 100);
+        image(playerImg, 350, 300, 100, 100);
+        image(potionImg, 450, 200, 100, 100);
+        image(ratImg, 450, 400, 100, 100);
     }
     
     /* Instructions Area */
