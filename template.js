@@ -300,7 +300,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     /* Credits Area */
 
     var acidImg = loadImage("./images/acid.png");
-    var archerImg = loadImage("./images/archer.jpg");
+    var archerImg = loadImage("./images/archer.png");
     var eyeImg = loadImage("./images/eyeball.png");
     var knightImg = loadImage("./images/knight.png");
     var playerImg = loadImage("./images/player.png");
