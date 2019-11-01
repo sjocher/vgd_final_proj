@@ -63,12 +63,6 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         image(towerImg,250,100);
     };
 
-    var acidImg = loadImage("./images/acid.png");
-    var drawAcid = function () {
-        image(acidImg, 50, 50);
-    };
-
-
     var fogObj = function(x,y) {
         this.x = x;
         this.y = y;
@@ -305,15 +299,22 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     /* Credits Area */
 
+    var acidImg = loadImage("./images/acid.png");
+    var archerImg = loadImage("./images/archer.jpg");
+    var eyeImg = loadImage("./images/eyeball.png");
+    var knightImg = loadImage("./images/knight.png");
+    var playerImg = loadImage("./images/player.png");
+    var potionImg = loadImage("./images/potion.png");
+    var ratImg = loadImage("./images/rat.png");
     var drawCredits = function () {
         background(0,0,0);
-        fill(255, 255, 255);
-        textSize(32);
-        //Authors Area
-        text("Thanks for Playing!", 260, 50);
-        text("Game by", 320, 80);
-        text("Brad Ferguson & Sean Jocher", 190, 120);
-        drawAcid();
+        image(acidImg, 0, 100, 100, 100);
+        image(archerImg, 0, 200, 100, 100);
+        image(eyeImg, 0, 300, 100, 100);
+        image(knightImg, 0, 400, 100, 100);
+        image(playerImg, 0, 500, 100, 100);
+        image(potionImg, 100, 500, 100, 100);
+        image(ratImg, 200, 500, 100, 100);
     }
     
     /* Instructions Area */
