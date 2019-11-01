@@ -1,3 +1,12 @@
+/*
+    Names: Brad Ferguson & Sean Jocher
+    Project Name: Darkest Tower
+    Progress: Introduction & Title Screen Complete 11/1/19
+    Description: [Current State] Opening and menu screen for the start of Darkest Tower. Includes sounds for additional effect.
+                Sprites for game are in the credits. Menu screen exists as a FSM. Currently starting the game produces
+                no effect.
+ */
+
 var sketchProc=function(processingInstance){ with (processingInstance) {
 
     size(800, 600);
