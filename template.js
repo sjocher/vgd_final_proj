@@ -63,6 +63,12 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         image(towerImg,250,100);
     };
 
+    var acidImg = loadImage("./images/acid.png");
+    var drawAcid = function () {
+        image(acidImg, 50, 50);
+    };
+
+
     var fogObj = function(x,y) {
         this.x = x;
         this.y = y;
@@ -301,6 +307,13 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     var drawCredits = function () {
         background(0,0,0);
+        fill(255, 255, 255);
+        textSize(32);
+        //Authors Area
+        text("Thanks for Playing!", 260, 50);
+        text("Game by", 320, 80);
+        text("Brad Ferguson & Sean Jocher", 190, 120);
+        drawAcid();
     }
     
     /* Instructions Area */
