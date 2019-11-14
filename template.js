@@ -16,17 +16,17 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var soundBool = 1;
 
     /* SOUNDS */
-    var sound = function(src){
+    var sound = function (src) {
         this.sound = document.createElement("audio");
         this.sound.src = src;
         this.sound.setAttribute("preload", "auto");
         this.sound.setAttribute("controls", "none");
         this.sound.style.display = "none";
         document.body.appendChild(this.sound);
-        this.play = function(){
+        this.play = function () {
             this.sound.play();
         }
-        this.stop = function() {
+        this.stop = function () {
             this.sound.pause();
         }
     };
@@ -37,19 +37,19 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
 
     var a = random(1500);
-    var mountains = [[],[],[]];
-    var b=random(1500);
-    for (var i=0; i<=2; i++) {
-        for (var j=0; j<=80; j++) {
+    var mountains = [[], [], []];
+    var b = random(1500);
+    for (var i = 0; i <= 2; i++) {
+        for (var j = 0; j <= 80; j++) {
             var n = noise(b);
-            mountains[i][j] = map(n,0,1,0,400-i*50);
+            mountains[i][j] = map(n, 0, 1, 0, 400 - i * 50);
             b += 0.05;  // ruggedness
         }
     }
 
-    var drawSky = function(ymin){
+    var drawSky = function (ymin) {
         //background(3, 102, 242);
-        background(15,46,89);
+        background(15, 46, 89);
         noStroke();
 
         // sky
@@ -58,7 +58,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             var n2 = 0;
             for (var y = 0; y <= ymin; y += 8) {
                 var c = map(noise(n1, n2), 0, 2, 0, 255);
-                fill(c, c, c , 150);
+                fill(c, c, c, 150);
                 rect(x, y, 8, 8);
                 n2 += 0.05; // step size in noise
             }
@@ -68,103 +68,102 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     };
 
     var towerImg = loadImage("./images/tower.png");
-    var drawTower = function() {
-        image(towerImg,250,100);
+    var drawTower = function () {
+        image(towerImg, 250, 100);
     };
 
-    var fogObj = function(x,y) {
+    var fogObj = function (x, y) {
         this.x = x;
         this.y = y;
         this.speed = 0.1;
     };
 
     var fogImg = loadImage("./images/fog.png");
-    fogObj.prototype.draw = function(){
-        image(fogImg,this.x,this.y);
-        if (this.x > 0 || this.x < -800){
+    fogObj.prototype.draw = function () {
+        image(fogImg, this.x, this.y);
+        if (this.x > 0 || this.x < -800) {
             this.speed *= -1;
         }
         this.x += this.speed;
     };
 
-    var fog = new fogObj(-800,0);
+    var fog = new fogObj(-800, 0);
 
-    var rainObj = function(x, y) {
+    var rainObj = function (x, y) {
         this.position = new PVector(x, y);
         this.velocity = new PVector(0, random(3, 7));
-        this.size = random(5,12);
+        this.size = random(5, 12);
         this.position.y -= (18 - this.size);
         this.timeLeft = 255;
     };
 
     var rain = [];
 
-    rainObj.prototype.move = function() {
+    rainObj.prototype.move = function () {
         this.position.add(this.velocity);
         this.timeLeft--;
     };
 
-    rainObj.prototype.draw = function() {
+    rainObj.prototype.draw = function () {
         noStroke();
         //fill(this.c1, this.c1, this.c1, this.timeLeft);
-        stroke(183, 193, 240,this.timeLeft);
+        stroke(183, 193, 240, this.timeLeft);
         strokeWeight(1);
-        line(this.position.x,this.position.y,this.position.x,this.position.y+this.size);
+        line(this.position.x, this.position.y, this.position.x, this.position.y + this.size);
         //ellipse(this.position.x, this.position.y, this.size, this.size*2);
     };
 
-    var drawFirstOpen = function(fade) {
-        fill(0,0,0);
-        rect(0,0,800,600);
-        fill(200,200,200,fade);
+    var drawFirstOpen = function (fade) {
+        fill(0, 0, 0);
+        rect(0, 0, 800, 600);
+        fill(200, 200, 200, fade);
         textSize(64);
         textAlign(CENTER);
-        text("A Game by",400,200);
-        text("Brad\nFerguson", 220,300);
-        text("Sean\nJocher", 600,300);
+        text("A Game by", 400, 200);
+        text("Brad\nFerguson", 220, 300);
+        text("Sean\nJocher", 600, 300);
         textSize(128);
-        text("&", 420,350);
+        text("&", 420, 350);
         textAlign(LEFT);
     };
 
     var titleImg = loadImage("./images/title.png");
-    var drawOpening = function() {
+    var drawOpening = function () {
         drawSky(250);
-        for (x=0; x<=2; x++) {
-            for (var y=0; y<=80; y++) {
-                fill(20 + x*4, 60+x*7, 40+x*4);
+        for (x = 0; x <= 2; x++) {
+            for (var y = 0; y <= 80; y++) {
+                fill(20 + x * 4, 60 + x * 7, 40 + x * 4);
                 // draw quads of width 10 pixels
-                quad(y*10,mountains[x][y]+x*55,(y+1)*10,mountains[x][y+1]+(x)*55,(y+1)*10,600,y*10,800);
+                quad(y * 10, mountains[x][y] + x * 55, (y + 1) * 10, mountains[x][y + 1] + (x) * 55, (y + 1) * 10, 600, y * 10, 800);
             }
         }
         fog.draw();
         if (rain.length < 500) {
-            rain.push(new rainObj(random(0,800), 0));
-            rain.push(new rainObj(random(0,800), 0));
-            rain.push(new rainObj(random(0,800), 0));
+            rain.push(new rainObj(random(0, 800), 0));
+            rain.push(new rainObj(random(0, 800), 0));
+            rain.push(new rainObj(random(0, 800), 0));
         }
-        for (var i=0; i<rain.length; i++) {
+        for (var i = 0; i < rain.length; i++) {
             if ((rain[i].timeLeft > 0) && (rain[i].position.y < 600)) {
                 rain[i].draw();
                 rain[i].move();
                 if (soundBool === 1) {
                     rainSound.play();
                 }
-                if (soundBool === -1){
+                if (soundBool === -1) {
                     rainSound.stop();
                 }
-            }
-            else {
+            } else {
                 rain.splice(i, 1);
             }
         }
         drawTower();
-        image(titleImg,50,25);
+        image(titleImg, 50, 25);
         //fill(160,160,160,90);
         //rect(0,0,800,600);
     };
 
-    var openingObj = function(state) {
+    var openingObj = function (state) {
         this.state = state;
         this.fade = 0;
         this.peak = false;
@@ -172,34 +171,44 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.currFrame = 0;
     };
 
-    openingObj.prototype.draw = function() {
-        switch(this.state){
+    openingObj.prototype.draw = function () {
+        switch (this.state) {
             case 0:
                 drawFirstOpen(this.fade);
-                if(this.fade < 255 && !this.peak){this.fade++;}
-                if(this.fade === 255){this.peak = true;}
-                if(this.fade > 0 && this.peak){this.fade--;}
-                if(this.fade === 0 && this.peak){this.state = 1; this.fade = 255;}
+                if (this.fade < 255 && !this.peak) {
+                    this.fade++;
+                }
+                if (this.fade === 255) {
+                    this.peak = true;
+                }
+                if (this.fade > 0 && this.peak) {
+                    this.fade--;
+                }
+                if (this.fade === 0 && this.peak) {
+                    this.state = 1;
+                    this.fade = 255;
+                }
                 break;
             case 1:
                 drawOpening();
-                fill(0,0,0,this.fade);
-                rect(0,0,800,600);
-                if(this.fade > 0){this.fade--;}
-                if(this.fade === 0){
+                fill(0, 0, 0, this.fade);
+                rect(0, 0, 800, 600);
+                if (this.fade > 0) {
+                    this.fade--;
+                }
+                if (this.fade === 0) {
                     //PRESS ENTER
                     if (this.showEnter === 1) {
                         textAlign(CENTER);
-                        fill(255,255,255);
+                        fill(255, 255, 255);
                         textSize(32);
-                        text("Press Enter", 400,500);
+                        text("Press Enter", 400, 500);
                         textAlign(LEFT);
                         if (this.currFrame < (frameCount - 60)) {
                             this.currFrame = frameCount;
                             this.showEnter = 0;
                         }
-                    }
-                    else {
+                    } else {
                         if (this.currFrame < (frameCount - 30)) {
                             this.currFrame = frameCount;
                             this.showEnter = 1;
@@ -219,21 +228,21 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     /* MENU SCREEN AREA */
 
-    var buttonMenuObj = function(x, y, state, textOption) {
+    var buttonMenuObj = function (x, y, state, textOption) {
         this.state = state;
         this.x = x;
         this.y = y;
         this.textOption = textOption;
     }
-    
+
     buttonMenuObj.prototype.draw = function () {
-        if(this.state == "selected") {
+        if (this.state === "selected") {
             fill(181, 41, 20);
-        } else if(this.state == "unselected") {
+        } else if (this.state === "unselected") {
             fill(34, 34, 36);
         }
         rect(this.x, this.y, 280, 50, 25);
-        fill(255,255,255);
+        fill(255, 255, 255);
         textSize(32);
         text(this.textOption, this.x + 64, this.y + 36);
     }
@@ -244,16 +253,16 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var soundButton = new buttonMenuObj(260, 440, "unselected", "Sound: ON");
 
     var swordImg = loadImage("./images/sword.png");
-    var selectorMenuObj = function(x, y) {
+    var selectorMenuObj = function (x, y) {
         this.x = x;
         this.y = y;
         fill(181, 41, 20);
-        image(swordImg,this.x-30,this.y);
+        image(swordImg, this.x - 30, this.y);
         //triangle(this.x, this.y, this.x + 30, this.y + 15, this.x, this.y + 30);
     }
 
-    var cycleMenu = function(state) {
-        switch(state) {
+    var cycleMenu = function (state) {
+        switch (state) {
             case 0:
                 startButton.state = "selected";
                 instructionsButton.state = "unselected"
@@ -285,7 +294,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         }
     };
 
-    var drawMenuOptions = function(state) {
+    var drawMenuOptions = function (state) {
         cycleMenu(state);
         startButton.draw();
         instructionsButton.draw();
@@ -293,11 +302,11 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         soundButton.draw();
     };
 
-    var menu = function(state) {
+    var menu = function (state) {
         this.state = state;
     }
 
-    menu.prototype.draw = function() {
+    menu.prototype.draw = function () {
         //Setup background for the menu
         drawOpening();
         //Setup Menu Options
@@ -316,7 +325,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var potionImg = loadImage("./images/potion.png");
     var ratImg = loadImage("./images/rat.png");
     var drawCredits = function () {
-        background(0,0,0);
+        background(0, 0, 0);
         fill(255, 255, 255);
         textSize(32);
         //Authors Area
@@ -331,13 +340,13 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         image(potionImg, 450, 200, 100, 100);
         image(ratImg, 450, 400, 100, 100);
     }
-    
+
     /* Instructions Area */
 
     var instructionImg = loadImage("./images/instructions.png");
     var drawInstructions = function () {
-        background(0,0,0);
-        fill(255,255,255);
+        background(0, 0, 0);
+        fill(255, 255, 255);
         textSize(64);
         textAlign(CENTER);
         text("Controls", 400, 70);
@@ -348,43 +357,179 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         text("Press Enter to Return to Main Menu", 400, 550);
         textAlign(LEFT);
     }
-    
+
+    /* TEST */
+    var rightForce = new PVector(1, 0);
+    var leftForce = new PVector(-1, 0);
+    var upForce = new PVector(0, -1);
+    var downForce = new PVector(0, 1);
+
+    var arrowObj = function(x,y, velocity, time, player) {
+        this.position = new PVector(x,y);
+        this.velocity = velocity;
+        this.timeEnd = frameCount + time;
+        this.player = false; //true if fired from player
+    };
+
+
+    var playerObj = function (x, y) {
+        this.position = new PVector(x, y);
+        this.velocity = new PVector(0, 0);
+        this.acceleration = new PVector(0, 0);
+        this.force = new PVector(0, 0);
+
+        this.life = 10;
+        this.w = 50;
+        this.h = 50;
+
+        //movement
+        this.walkRight = 0;
+        this.walkLeft = 0;
+        this.walkUp = 0;
+        this.walkDown = 0;
+        this.maxSpeed = 3;
+        this.frictionCoeff = -0.1;
+        this.friction = new PVector(0, 0);
+        this.forceCoeff = 0.1;
+
+        //collision
+        this.up = true;
+        this.down = true;
+        this.left = true;
+        this.right = true;
+
+        //arrows
+        arrows = [];
+
+
+    };
+
+    playerObj.prototype.applyForce = function (force) {
+        this.acceleration.add(force);
+    };
+
+    playerObj.prototype.draw = function () {
+        noFill();
+        stroke(0,0,0);
+        strokeWeight(1);
+        rect(this.position.x +13, this.position.y, 25, this.h);
+        image(playerImg, this.position.x, this.position.y, this.w, this.h);
+    };
+
+    playerObj.prototype.move = function () {
+        this.up = true;
+        this.down = true;
+        this.left = true;
+        this.right = true;
+        this.acceleration.set(0, 0);
+        if (this.velocity.x <= this.maxSpeed) {
+            if (this.walkRight === 1 && this.right) {
+                this.applyForce(rightForce*this.forceCoeff);
+            }
+        }
+        if (this.velocity.x >= -this.maxSpeed) {
+            if (this.walkLeft === 1 && this.left) {
+                this.applyForce(leftForce*this.forceCoeff);
+            }
+        }
+        if (this.velocity.y >= -this.maxSpeed) {
+            if (this.walkUp === 1 && this.up) {
+                this.applyForce(upForce*this.forceCoeff);
+            }
+        }
+        if (this.velocity.y <= this.maxSpeed) {
+            if (this.walkDown === 1 && this.down) {
+                this.applyForce(downForce*this.forceCoeff);
+            }
+        }
+        this.velocity.add(this.acceleration);
+        if (!this.walkRight && !this.walkLeft ){
+            this.friction.set(this.velocity.x, 0);
+            this.friction.mult(this.frictionCoeff);
+            this.velocity.add(this.friction);
+        }
+        if (!this.walkUp && !this.walkDown) {
+            this.friction.set(0, this.velocity.y);
+            this.friction.mult(this.frictionCoeff);
+            this.velocity.add(this.friction);
+        }
+        this.position.add(this.velocity);
+        this.acceleration.set(0, 0);
+
+        if (this.position.x > 800) {
+            this.position.x = -this.w;
+        } else if (this.position.x < -this.w) {
+            this.position.x = 800;
+        }
+        if (this.position.y > 600) {
+            this.position.y = -this.h;
+        } else if (this.position.y < -this.h) {
+            this.position.y = 600;
+        }
+
+    };
+
+    player = new playerObj(200, 200);
+
+
+    var drawTest = function () {
+        background(255, 255, 255);
+        noStroke();
+        fill(0,0,0);
+        for (var i=1; i<17; i++){
+            rect(i*50-25, 0, 1, 600);
+            text(i, i*50 - 25, 25);
+        }
+        for (var i=1; i<13; i++){
+            rect(0, i*50-25, 800, 1);
+        }
+        player.move();
+        player.draw();
+    };
+
+
     /* Main Draw and Key Input Area */
 
-    var keyPressed = function() {
-        switch(state) {
+    var keyPressed = function () {
+        switch (state) {
             case "opening":
-                if(keyCode == ENTER) {
+                if (keyCode === ENTER) {
                     state = "menu";
                 }
             case "menu":
-                if(keyCode == UP) {
+                if (keyCode === UP) {
                     if (soundBool === 1) {
                         clickSound.play();
                     }
-                    if(menu.state == 0) {
+                    if (menu.state === 0) {
                         menu.state = 3;
                     } else {
                         menu.state--;
                     }
-                } else if(keyCode == DOWN) {
+                } else if (keyCode === DOWN) {
                     if (soundBool === 1) {
                         clickSound.play();
                     }
-                    if(menu.state == 3) {
+                    if (menu.state === 3) {
                         menu.state = 0;
                     } else {
                         menu.state++;
                     }
                 }
-                if(keyCode == ENTER) {
-                    switch(menu.state) {
+                if (keyCode === 32) {
+                    //SPACE
+                    rainSound.stop();
+                    state = "test";
+                    break;
+                }
+                if (keyCode === ENTER) {
+                    switch (menu.state) {
                         case -1:
                             menu.state = 0;
                             break;
                         case 0:
-                            //state = "game";
-                            //rainSound.stop();
+                            rainSound.stop();
+                            state = "game";
                             break;
                         case 1:
                             state = "instructions";
@@ -396,29 +541,67 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                             break;
                         case 3:
                             soundBool *= -1;
-                            if (soundBool === 1){soundButton.textOption = "Sound: ON";}
-                            else if (soundBool === -1){soundButton.textOption = "Sound: OFF";}
+                            if (soundBool === 1) {
+                                soundButton.textOption = "Sound: ON";
+                            } else if (soundBool === -1) {
+                                soundButton.textOption = "Sound: OFF";
+                            }
                             break;
                     }
                     //menu.state = 0;
                 }
                 break;
             case "credits":
-                if(keyCode == ENTER) {
+                if (keyCode === ENTER) {
                     state = "menu";
                 }
                 break;
             case "instructions":
-                if(keyCode == ENTER) {
+                if (keyCode === ENTER) {
                     state = "menu";
+                }
+                break;
+            case "test":
+                if (keyCode === 68 || keyCode === 100) {//D or d
+                    player.walkRight = 1;
+                }
+                if (keyCode === 65 || keyCode === 97) {//A or a
+                    player.walkLeft = 1;
+                }
+                if (keyCode === 87 || keyCode === 119) {//W or w
+                    player.walkUp = 1;
+                }
+                if (keyCode === 83 || keyCode === 115) {//S or s
+                    player.walkDown = 1;
                 }
                 break;
 
         }
     }
 
-    var draw = function() {
-        switch(state){
+    var keyReleased = function () {
+        switch (state) {
+            case "test":
+                if (keyCode === 68 || keyCode === 100) {//D or d
+                    player.walkRight = 0;
+                }
+                if (keyCode === 65 || keyCode === 97) {//A or a
+                    player.walkLeft = 0;
+                }
+                if (keyCode === 87 || keyCode === 119) {//W or w
+                    player.walkUp = 0;
+                }
+                if (keyCode === 83 || keyCode === 115) {//S or s
+                    player.walkDown = 0;
+                }
+                break;
+
+
+        }
+    };
+
+    var draw = function () {
+        switch (state) {
             case "opening":
                 opening.draw();
                 break;
@@ -433,9 +616,13 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 break;
             case "game":
                 break;
+            case "test":
+                drawTest();
+                break;
             case "gameover":
                 break;
         }
         //drawSky();
     };
+
 }};
