@@ -12,6 +12,26 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     size(800, 600);
     frameRate(60);
 
+    /* TILEMAPS 15 x 11 */
+
+    //Room variables
+
+    var room0 =    ["wwwwwwwwwwwwwww",
+                    "wwwwwwwwwwwwwww",
+                    "ww-----------ww",
+                    "ww-----------ww",
+                    "ww-----------ww",
+                    "ww-----------ww",
+                    "ww-----------ww",
+                    "ww-----------ww",
+                    "ww-----------ww",
+                    "wwwwwwwwwwwwwww",
+                    "wwwwwwwwwwwwwww"];
+
+    //Functions to load the rooms
+
+    /* TILEMAP END */
+
     var state = "opening";
     var soundBool = 1;
 
