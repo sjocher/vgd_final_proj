@@ -378,7 +378,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.acceleration = new PVector(0, 0);
         this.force = new PVector(0, 0);
 
-        this.life = 10;
+        this.life = 6;
+        this.maxLife = 6;
         this.w = 50;
         this.h = 50;
 
@@ -414,6 +415,14 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         strokeWeight(1);
         rect(this.position.x +13, this.position.y, 25, this.h);
         image(playerImg, this.position.x, this.position.y, this.w, this.h);
+        this.drawLife();
+    };
+
+    playerObj.prototype.drawLife = function(){
+        //draw max heart containers
+        
+
+        //draw filled in hearts
     };
 
     playerObj.prototype.move = function () {
@@ -422,32 +431,46 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.left = true;
         this.right = true;
         this.acceleration.set(0, 0);
+
+        //check for collisions here
+
+        //set acceleration if moving
         if (this.velocity.x <= this.maxSpeed) {
             if (this.walkRight === 1 && this.right) {
-                this.applyForce(rightForce*this.forceCoeff);
+                this.force.set(rightForce.x, 0);
+                this.force.mult(this.forceCoeff);
+                this.applyForce(this.force);
             }
         }
         if (this.velocity.x >= -this.maxSpeed) {
             if (this.walkLeft === 1 && this.left) {
-                this.applyForce(leftForce*this.forceCoeff);
+                this.force.set(leftForce.x, 0);
+                this.force.mult(this.forceCoeff);
+                this.applyForce(this.force);
             }
         }
         if (this.velocity.y >= -this.maxSpeed) {
             if (this.walkUp === 1 && this.up) {
-                this.applyForce(upForce*this.forceCoeff);
+                this.force.set(0, upForce.y);
+                this.force.mult(this.forceCoeff);
+                this.applyForce(this.force);
             }
         }
         if (this.velocity.y <= this.maxSpeed) {
             if (this.walkDown === 1 && this.down) {
-                this.applyForce(downForce*this.forceCoeff);
+                this.force.set(0, downForce.y);
+                this.force.mult(this.forceCoeff);
+                this.applyForce(this.force);
             }
         }
         this.velocity.add(this.acceleration);
+        //if not pressing right or left dont add x friction
         if (!this.walkRight && !this.walkLeft ){
             this.friction.set(this.velocity.x, 0);
             this.friction.mult(this.frictionCoeff);
             this.velocity.add(this.friction);
         }
+        //if not pressing up or down dont add y friction
         if (!this.walkUp && !this.walkDown) {
             this.friction.set(0, this.velocity.y);
             this.friction.mult(this.frictionCoeff);
@@ -456,6 +479,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.position.add(this.velocity);
         this.acceleration.set(0, 0);
 
+
+        //testing code
         if (this.position.x > 800) {
             this.position.x = -this.w;
         } else if (this.position.x < -this.w) {
