@@ -324,6 +324,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var playerImg = loadImage("./images/player.png");
     var potionImg = loadImage("./images/potion.png");
     var ratImg = loadImage("./images/rat.png");
+    var fullheartImg = loadImage("./images/fullheart.png");
     var drawCredits = function () {
         background(0, 0, 0);
         fill(255, 255, 255);
@@ -339,7 +340,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         image(playerImg, 350, 300, 100, 100);
         image(potionImg, 450, 200, 100, 100);
         image(ratImg, 450, 400, 100, 100);
-    }
+        image(fullheartImg, 600, 500, 30,30);
+    };
 
     /* Instructions Area */
 
@@ -420,7 +422,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     playerObj.prototype.drawLife = function(){
         //draw max heart containers
-        
+
 
         //draw filled in hearts
     };
