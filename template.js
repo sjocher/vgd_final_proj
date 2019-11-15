@@ -165,6 +165,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         for(var i = 0; i < this.doors.length; ++i) {
             this.doors[i].draw();
         }
+        for(var i = 0; i < this.floor.length; ++i) {
+            this.floor[i].draw();
+        }
     }
 
     var game_map = new room(room0, 0);
