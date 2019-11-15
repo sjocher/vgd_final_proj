@@ -14,7 +14,18 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     /* TILEMAPS 15 x 11 */
 
-    //Room variables
+    var wallObj = function(x, y) {
+        this.x = x;
+        this.y = y;
+        this.w = 50;
+        this.h = 50;
+    }
+
+    wallObj.prototype.draw = function() {
+        fill(0, 0, 0);
+        stroke(255, 255, 255);
+        rect(this.x, this.y, this.w, this.h);
+    }
 
     var room0 =    ["wwwwwwwwwwwwwww",
                     "wwwwwwwwwwwwwww",
@@ -27,6 +38,35 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                     "ww-----------ww",
                     "wwwwwwwwwwwwwww",
                     "wwwwwwwwwwwwwww"];
+
+    var room = function(curr, loaded) {
+        this.currRoom = room0;
+        this.walls = [];
+        this.loaded = loaded;
+    }
+
+    room.prototype.load = function() {
+        if(!this.loaded) {
+            this.walls = [];
+            for(var i = 0; i < this.currRoom.length; ++i) {
+                for(var j = 0; j < this.currRoom[0].length; ++j) {
+                    if(this.currRoom[i][j] === 'w') {
+                        this.walls.push(new wallObj(j*50 + 25, i*50 + 25));
+                    }
+                }
+            }
+            this.loaded = 1;
+        }
+    }
+    
+    room.prototype.draw = function() {
+        background(0,0,0);
+        for(var i = 0; i < this.walls.length; ++i) {
+            this.walls[i].draw();
+        }
+    }
+
+    var game_map = new room(room0, 0);
 
     //Functions to load the rooms
 
@@ -662,6 +702,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 drawInstructions();
                 break;
             case "game":
+                game_map.load();
+                game_map.draw();
                 break;
             case "test":
                 drawTest();
