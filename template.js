@@ -513,7 +513,6 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         image(playerImg, 350, 300, 100, 100);
         image(potionImg, 450, 200, 100, 100);
         image(ratImg, 450, 400, 100, 100);
-        image(fullheartImg, 600, 500, 30,30);
     };
 
     /* Instructions Area */
@@ -539,11 +538,48 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var upForce = new PVector(0, -1);
     var downForce = new PVector(0, 1);
 
-    var arrowObj = function(x,y, velocity, time, player) {
+
+    var arrowObj = function(x, y, direction, time, player, vx, vy) {
         this.position = new PVector(x,y);
-        this.velocity = velocity;
-        this.timeEnd = frameCount + time;
-        this.player = false; //true if fired from player
+        this.velocity = new PVector(vx, vy);
+        //0 - right
+        //1 - down
+        //2 - left
+        //3 - up
+        this.direction = direction;
+        this.currFrameCount = frameCount;
+        this.timeEnd = time;
+        this.player = player; //true if fired from player
+        this.speed = 5;
+    };
+
+    arrowObj.prototype.draw = function(){
+        if (frameCount >= (this.currFrameCount+this.timeEnd)){
+            return false;
+        }
+        else{
+            fill(255,0,0);
+            rect(this.position.x, this.position.y, 10, 10);
+            var step = new PVector(0,0);
+            step.add(this.velocity);
+            step.mult(0.25);
+            this.position.add(step);
+            switch (this.direction){
+                case 0: //right
+                        this.position.x += this.speed;
+                        break;
+                case 1:
+                        this.position.y += this.speed;
+                        break;
+                case 2:
+                        this.position.x -= this.speed;
+                        break;
+                case 3:
+                        this.position.y -= this.speed;
+                        break;
+            }
+        }
+        return true;
     };
 
 
@@ -574,8 +610,15 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.left = true;
         this.right = true;
 
-        //arrows
-        arrows = [];
+        //shooting
+        this.shootRight = 0;
+        this.shootLeft = 0;
+        this.shootUp = 0;
+        this.shootDown = 0;
+        this.shotSpeed = 20;
+        this.arrowDuration = 60;
+        this.currFrameCount = 0; //time of shooting
+        this.arrows = [];
 
 
     };
@@ -590,14 +633,42 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         strokeWeight(1);
         rect(this.position.x +13, this.position.y, 25, this.h);
         image(playerImg, this.position.x, this.position.y, this.w, this.h);
+        for (var i=0; i<this.arrows.length; i++){
+            var alive = this.arrows[i].draw();
+            if (!alive){
+                this.arrows.splice(i,1);
+            }
+        }
         this.drawLife();
     };
 
+    var fullHeartImg = loadImage("./images/fullheart.png");
+    var halfHeartImg = loadImage("./images/halfheart.png");
+    var emptyHeartImg = loadImage("./images/emptyheart.png");
     playerObj.prototype.drawLife = function(){
         //draw max heart containers
-
-
+        var hearts = this.maxLife / 2;
+        //text("hearts: " + hearts, 200, 200);
+        for (var i=0; i<hearts; i++){
+            image(emptyHeartImg, 40*i+30, 30, 40, 40);
+        }
         //draw filled in hearts
+        if (this.life % 2 === 0){
+            //even
+            var fillHearts = this.life / 2;
+            for (var i=0; i<fillHearts; i++){
+                image(fullHeartImg, 40*i+30, 30, 40, 40);
+            }
+        }
+        if ((this.life - 1) % 2 === 0){
+            //odd amount of life
+            var fillHearts = (this.life-1) / 2;
+            for (var i=0; i<fillHearts; i++){
+                image(fullHeartImg, 40*i+30, 30, 40, 40);
+            }
+            image(halfHeartImg, 40*fillHearts+30, 30, 40, 40);
+        }
+
     };
 
     playerObj.prototype.move = function () {
@@ -669,10 +740,32 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     };
 
+    playerObj.prototype.shoot = function(){
+        if (this.currFrameCount < (frameCount - this.shotSpeed)) {
+            if (this.shootRight === 1) {
+                this.currFrameCount = frameCount;
+                this.arrows.push(new arrowObj(this.position.x + player.w, this.position.y + this.h / 2, 0, this.arrowDuration, true, this.velocity.x, this.velocity.y));
+            }
+            if (this.shootLeft === 1) {
+                this.currFrameCount = frameCount;
+                this.arrows.push(new arrowObj(this.position.x, this.position.y + this.h / 2, 2, this.arrowDuration, true, this.velocity.x, this.velocity.y));
+            }
+            if (this.shootUp === 1) {
+                this.currFrameCount = frameCount;
+                this.arrows.push(new arrowObj(this.position.x + player.w / 2, this.position.y, 3, this.arrowDuration, true, this.velocity.x, this.velocity.y));
+            }
+            if (this.shootDown === 1) {
+                this.currFrameCount = frameCount;
+                this.arrows.push(new arrowObj(this.position.x + player.w / 2, this.position.y + this.h, 1, this.arrowDuration, true, this.velocity.x, this.velocity.y));
+            }
+        }
+    };
+
     player = new playerObj(200, 200);
 
 
     var drawTest = function () {
+        /*
         background(255, 255, 255);
         noStroke();
         fill(0,0,0);
@@ -683,8 +776,10 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         for (var i=1; i<13; i++){
             rect(0, i*50-25, 800, 1);
         }
+        */
         player.move();
         player.draw();
+        player.shoot();
     };
 
 
@@ -774,10 +869,24 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 if (keyCode === 83 || keyCode === 115) {//S or s
                     player.walkDown = 1;
                 }
+                if (player.currFrameCount < (frameCount - player.shotSpeed)){
+                    if (keyCode === RIGHT){
+                        player.shootRight = 1;
+                    }
+                    if (keyCode === LEFT){
+                        player.shootLeft = 1;
+                    }
+                    if (keyCode === UP){
+                       player.shootUp = 1;
+                    }
+                    if (keyCode === DOWN){
+                       player.shootDown = 1;
+                    }
+                }
                 break;
 
         }
-    }
+    };
 
     var keyReleased = function () {
         switch (state) {
@@ -793,6 +902,18 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 }
                 if (keyCode === 83 || keyCode === 115) {//S or s
                     player.walkDown = 0;
+                }
+                if (keyCode === RIGHT){
+                    player.shootRight = 0;
+                }
+                if (keyCode === LEFT){
+                    player.shootLeft = 0;
+                }
+                if (keyCode === UP){
+                   player.shootUp = 0;
+                }
+                if (keyCode === DOWN){
+                   player.shootDown = 0;
                 }
                 break;
 
@@ -819,6 +940,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 game_map.draw();
                 break;
             case "test":
+                game_map.load();
+                game_map.draw();
                 drawTest();
                 break;
             case "gameover":
