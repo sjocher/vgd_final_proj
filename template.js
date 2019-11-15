@@ -107,6 +107,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     room.prototype.load = function() {
         if(!this.loaded) {
             this.walls = [];
+            this.doors = [];
+            this.floor = [];
             for(var i = 0; i < this.currRoom.length; ++i) {
                 for(var j = 0; j < this.currRoom[0].length; ++j) {
                     if(this.currRoom[i][j] === 'l') {
@@ -503,6 +505,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var door_right = loadImage("./images/door_right.png");
     var door_up = loadImage("./images/door_up.png");
     var door_down = loadImage("./images/door_down.png");
+    var arrow = loadImage("./images/arrow.png");
     var drawCredits = function () {
         background(0, 0, 0);
         fill(255, 255, 255);
@@ -564,7 +567,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         }
         else{
             fill(255,0,0);
-            rect(this.position.x, this.position.y, 10, 10);
+            image(arrow, this.position.x, this.position.y, 20, 10);
             var step = new PVector(0,0);
             step.add(this.velocity);
             step.mult(0.25);
