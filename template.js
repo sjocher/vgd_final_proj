@@ -588,6 +588,33 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var downForce = new PVector(0, 1);
 
 
+    var checkCollisionWalls = function(obj){
+        //check for walls
+        var collision = 0;
+        if (obj.position.x <= 125 || obj.position.x + obj.w >= 675 || obj.position.y <= 125 || obj.position.y + obj.h >= 475) {
+            // collision detected!
+            text("HIT!",200,200);
+            if (obj.position.x < 125){
+                obj.left = false;
+                obj.position.x = 125;
+            }
+            if (obj.position.x + obj.w > 675){
+                obj.right = false;
+                obj.position.x = 675 - obj.w;
+            }
+            if (obj.position.y < 125){
+                obj.up = false;
+                obj.position.y = 125;
+            }
+            if (obj.position.y + obj.h > 475){
+                obj.down = false;
+                obj.position.y = 475 - obj.h;
+            }
+        }
+
+    };
+
+
     var arrowObj = function(x, y, direction, time, player, vx, vy) {
         this.position = new PVector(x,y);
         this.velocity = new PVector(vx, vy);
@@ -729,6 +756,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.acceleration.set(0, 0);
 
         //check for collisions here
+        checkCollisionWalls(this);
 
         //set acceleration if moving
         if (this.velocity.x <= this.maxSpeed) {
@@ -772,7 +800,15 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             this.friction.mult(this.frictionCoeff);
             this.velocity.add(this.friction);
         }
+        if (!this.right || !this.left){
+            this.velocity.x = 0;
+        }
+        if (!this.up || !this.down){
+            this.velocity.y = 0;
+        }
+
         this.position.add(this.velocity);
+
         this.acceleration.set(0, 0);
 
 
