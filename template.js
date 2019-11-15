@@ -205,6 +205,11 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             this.floor[i].draw();
         }
         for(var i = 0; i < this.doors.length; ++i) {
+            if(this.enemies.length > 0) {
+                this.doors[i].open = 0;
+            } else {
+                this.doors[i].open = 1;
+            }
             this.doors[i].draw();
         }
         for(var i = 0; i < this.enemies.length; ++i){
