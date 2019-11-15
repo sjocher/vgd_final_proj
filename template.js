@@ -636,10 +636,12 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     };
 
     playerObj.prototype.draw = function () {
-        noFill();
         stroke(0,0,0);
         strokeWeight(1);
-        rect(this.position.x +13, this.position.y, 25, this.h);
+        fill(0,0,0,150);
+        ellipse(this.position.x +this.w/2+3, this.position.y+this.h-4, 40, this.h/2-10);
+        noFill();
+        rect(this.position.x +12, this.position.y, 30, this.h);
         image(playerImg, this.position.x, this.position.y, this.w, this.h);
         for (var i=0; i<this.arrows.length; i++){
             var alive = this.arrows[i].draw();
@@ -881,13 +883,13 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                     if (keyCode === RIGHT){
                         player.shootRight = 1;
                     }
-                    if (keyCode === LEFT){
+                    else if (keyCode === LEFT){
                         player.shootLeft = 1;
                     }
-                    if (keyCode === UP){
+                    else if (keyCode === UP){
                        player.shootUp = 1;
                     }
-                    if (keyCode === DOWN){
+                    else if (keyCode === DOWN){
                        player.shootDown = 1;
                     }
                 }
