@@ -130,16 +130,16 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                         this.floor.push(new floorObj(j*50 + 25, i*50 + 25, cobble));
                     }
                     if(this.currRoom[i][j] === '<') {
-                        this.walls.push(new floorObj(j*50 + 25, i*50 + 25, UL));
+                        this.walls.push(new wallObj(j*50 + 25, i*50 + 25, UL));
                     }
                     if(this.currRoom[i][j] === '>') {
-                        this.walls.push(new floorObj(j*50 + 25, i*50 + 25, UR));
+                        this.walls.push(new wallObj(j*50 + 25, i*50 + 25, UR));
                     }
                     if(this.currRoom[i][j] === '{') {
-                        this.walls.push(new floorObj(j*50 + 25, i*50 + 25, BL));
+                        this.walls.push(new wallObj(j*50 + 25, i*50 + 25, BL));
                     }
                     if(this.currRoom[i][j] === '}') {
-                        this.walls.push(new floorObj(j*50 + 25, i*50 + 25, LR));
+                        this.walls.push(new wallObj(j*50 + 25, i*50 + 25, LR));
                     }
                     if(this.currRoom[i][j] === '[') {
                         this.doors.push(new floorObj(j*50 + 25, i*50 + 25, door_left));
