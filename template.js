@@ -95,9 +95,11 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                     "cl-----------rc",
                     "c{ddddddddddd}c",
                     "ccccccccccccccc"];
+
     var room = function(curr, loaded) {
         this.currRoom = curr;
         this.walls = [];
+        this.floor = [];
         this.doors = [];
         this.loaded = loaded;
     }
@@ -120,22 +122,22 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                         this.walls.push(new wallObj(j*50 + 25, i*50 + 25, wall_right));
                     }
                     if(this.currRoom[i][j] === '-') {
-                        this.walls.push(new floorObj(j*50 + 25, i*50 + 25, floor_block));
+                        this.floor.push(new floorObj(j*50 + 25, i*50 + 25, floor_block));
                     }
                     if(this.currRoom[i][j] === 'c') {
-                        this.walls.push(new floorObj(j*50 + 25, i*50 + 25, cobble));
+                        this.floor.push(new floorObj(j*50 + 25, i*50 + 25, cobble));
                     }
                     if(this.currRoom[i][j] === '<') {
-                        this.walls.push(new floorObj(j*50 + 25, i*50 + 25, UL));
+                        this.floor.push(new floorObj(j*50 + 25, i*50 + 25, UL));
                     }
                     if(this.currRoom[i][j] === '>') {
-                        this.walls.push(new floorObj(j*50 + 25, i*50 + 25, UR));
+                        this.floor.push(new floorObj(j*50 + 25, i*50 + 25, UR));
                     }
                     if(this.currRoom[i][j] === '{') {
-                        this.walls.push(new floorObj(j*50 + 25, i*50 + 25, BL));
+                        this.floor.push(new floorObj(j*50 + 25, i*50 + 25, BL));
                     }
                     if(this.currRoom[i][j] === '}') {
-                        this.walls.push(new floorObj(j*50 + 25, i*50 + 25, LR));
+                        this.floor.push(new floorObj(j*50 + 25, i*50 + 25, LR));
                     }
                     if(this.currRoom[i][j] === '[') {
                         this.doors.push(new floorObj(j*50 + 25, i*50 + 25, door_left));
