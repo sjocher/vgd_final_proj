@@ -854,7 +854,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.right = true;
     };
 
-    eyeballObj.prototype.draw(){
+    eyeballObj.prototype.draw = function(){
         if (this.hit){
             tint(255,0,0,250);
             image(ratImg, this.position.x, this.position.y, this.w, this.h);
@@ -1043,7 +1043,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             var current_door = gamestate.drawRoomData.doors[i];
             var door_direction = current_door.direction;
             if (this.position.x < current_door.x + current_door.w && this.position.x + this.w > current_door.x && this.position.y < current_door.y + current_door.h && this.position.y + this.h > current_door.y) {
-                switch(door_direction) {
+                if(current_door.open) {
+                    switch(door_direction) {
                     /* Rough Door Locations
                      (375, 75, door_up, "up", 1));
                      (375, 475, door_down, "down", 1));
@@ -1069,6 +1070,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                         gamestate.level.playerRoomLocation.y++;
                         this.position = new PVector(80 + this.w, 275);
                         break;
+                }
                 }
             }
         }
