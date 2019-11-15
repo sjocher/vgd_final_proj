@@ -172,7 +172,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         }
     }
 
-    var game_map = new room(room0, 0);
+    var game = new room(room0, 0);
 
     //Functions to load the rooms
 
@@ -566,7 +566,6 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             return false;
         }
         else{
-            fill(255,0,0);
             image(arrow, this.position.x, this.position.y, 20, 10);
             var step = new PVector(0,0);
             step.add(this.velocity);
@@ -946,12 +945,12 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 drawInstructions();
                 break;
             case "game":
-                game_map.load();
-                game_map.draw();
+                game.load();
+                game.draw();
                 break;
             case "test":
-                game_map.load();
-                game_map.draw();
+                game.load();
+                game.draw();
                 drawTest();
                 break;
             case "gameover":
