@@ -14,30 +14,39 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     /* TILEMAPS 15 x 11 */
 
-    var wallObj = function(x, y) {
+    var wallObj = function(x, y, file) {
         this.x = x;
         this.y = y;
         this.w = 50;
         this.h = 50;
+        this.file = file;
     }
 
     wallObj.prototype.draw = function() {
-        fill(0, 0, 0);
-        stroke(255, 255, 255);
-        rect(this.x, this.y, this.w, this.h);
+        image(this.file, this.x, this.y, this.w, this.h);
     }
 
-    var room0 =    ["wwwwwwwwwwwwwww",
-                    "wwwwwwwwwwwwwww",
-                    "ww-----------ww",
-                    "ww-----------ww",
-                    "ww-----------ww",
-                    "ww-----------ww",
-                    "ww-----------ww",
-                    "ww-----------ww",
-                    "ww-----------ww",
-                    "wwwwwwwwwwwwwww",
-                    "wwwwwwwwwwwwwww"];
+    var floorObj = function(x, y, file) {
+        this.file = file;
+        this.x = x;
+        this.y = y;
+    }
+
+    floorObj.prototype.draw = function() {
+        image(this.file, this.x, this.y, 50, 50);
+    }
+
+    var room0 =    ["ccccccccccccccc",
+                    "c<uuuuuuuuuuu>c",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "c{ddddddddddd}c",
+                    "ccccccccccccccc"];
 
     var room = function(curr, loaded) {
         this.currRoom = room0;
@@ -50,8 +59,35 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             this.walls = [];
             for(var i = 0; i < this.currRoom.length; ++i) {
                 for(var j = 0; j < this.currRoom[0].length; ++j) {
-                    if(this.currRoom[i][j] === 'w') {
-                        this.walls.push(new wallObj(j*50 + 25, i*50 + 25));
+                    if(this.currRoom[i][j] === 'l') {
+                        this.walls.push(new wallObj(j*50 + 25, i*50 + 25, wall_left));
+                    }
+                    if(this.currRoom[i][j] === 'u') {
+                        this.walls.push(new wallObj(j*50 + 25, i*50 + 25, wall_top));
+                    }
+                    if(this.currRoom[i][j] === 'd') {
+                        this.walls.push(new wallObj(j*50 + 25, i*50 + 25, wall_down));
+                    }
+                    if(this.currRoom[i][j] === 'r') {
+                        this.walls.push(new wallObj(j*50 + 25, i*50 + 25, wall_right));
+                    }
+                    if(this.currRoom[i][j] === '-') {
+                        this.walls.push(new floorObj(j*50 + 25, i*50 + 25, floor_block));
+                    }
+                    if(this.currRoom[i][j] === 'c') {
+                        this.walls.push(new floorObj(j*50 + 25, i*50 + 25, cobble));
+                    }
+                    if(this.currRoom[i][j] === '<') {
+                        this.walls.push(new floorObj(j*50 + 25, i*50 + 25, UL));
+                    }
+                    if(this.currRoom[i][j] === '>') {
+                        this.walls.push(new floorObj(j*50 + 25, i*50 + 25, UR));
+                    }
+                    if(this.currRoom[i][j] === '{') {
+                        this.walls.push(new floorObj(j*50 + 25, i*50 + 25, BL));
+                    }
+                    if(this.currRoom[i][j] === '}') {
+                        this.walls.push(new floorObj(j*50 + 25, i*50 + 25, LR));
                     }
                 }
             }
@@ -385,6 +421,16 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var potionImg = loadImage("./images/potion.png");
     var ratImg = loadImage("./images/rat.png");
     var fullheartImg = loadImage("./images/fullheart.png");
+    var floor_block = loadImage("./images/floor_block.png");
+    var wall_left = loadImage("./images/wall_left.png");
+    var wall_top = loadImage("./images/wall_top.png");
+    var wall_right = loadImage("./images/wall_right.png");
+    var wall_down = loadImage("./images/wall_bottom.png");
+    var cobble = loadImage("./images/cobble.png");
+    var UL = loadImage("./images/UL.png");
+    var UR = loadImage("./images/UR.png");
+    var BL = loadImage("./images/BL.png");
+    var LR = loadImage("./images/LR.png");
     var drawCredits = function () {
         background(0, 0, 0);
         fill(255, 255, 255);
