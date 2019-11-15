@@ -213,7 +213,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     }
 
     map_data.prototype.run = function() {
-        console.log(this.level.playerRoomLocation.x + " " + this.level.playerRoomLocation.y)
+        //console.log(this.level.playerRoomLocation.x + " " + this.level.playerRoomLocation.y)
         this.roomSpot = this.level.layout[this.level.playerRoomLocation.x][this.level.playerRoomLocation.y];
         this.currRoom = this.level.rooms[this.roomSpot];
         this.drawRoomData.door_locs = this.currRoom.doors;
@@ -968,6 +968,43 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         }
     };
 
+    playerObj.prototype.checkDoors = function() {
+        //console.log(gamestate.level.playerRoomLocation.x + " " + gamestate.level.playerRoomLocation.y)
+        for(var i = 0; i < gamestate.drawRoomData.doors.length; ++i) {
+            var current_door = gamestate.drawRoomData.doors[i];
+            var door_direction = current_door.direction;
+            if (this.position.x < current_door.x + current_door.w && this.position.x + this.w > current_door.x && this.position.y < current_door.y + current_door.h && this.position.y + this.h > current_door.y) {
+                switch(door_direction) {
+                    /* Rough Door Locations
+                     (375, 75, door_up, "up", 1));
+                     (375, 475, door_down, "down", 1));
+                     (75, 275, door_left, "left", 1));
+                     (675, 275, door_right, "right", 1));
+                     */
+
+                    case "up":
+                        //console.log("HIT");
+                        gamestate.level.playerRoomLocation.x--;
+                        //Reset player location to the bottom of a room
+                        this.position = new PVector(375, 470 - this.h);
+                        break;
+                    case "down":
+                        gamestate.level.playerRoomLocation.x++;
+                        this.position = new PVector(375,  80 + this.h);
+                        break;
+                    case "left":
+                        gamestate.level.playerRoomLocation.y--;
+                        this.position = new PVector(670 - this.w, 275);
+                        break;
+                    case "right":
+                        gamestate.level.playerRoomLocation.y++;
+                        this.position = new PVector(80 + this.w, 275);
+                        break;
+                }
+            }
+        }
+    }
+
     playerObj.prototype.move = function () {
         this.up = true;
         this.down = true;
@@ -1162,18 +1199,32 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 }
                 break;
             case "game":
-                if (keyCode === RIGHT){
-                        gamestate.level.playerRoomLocation.y++;
+                if (keyCode === 68 || keyCode === 100) {//D or d
+                    player.walkRight = 1;
+                }
+                if (keyCode === 65 || keyCode === 97) {//A or a
+                    player.walkLeft = 1;
+                }
+                if (keyCode === 87 || keyCode === 119) {//W or w
+                    player.walkUp = 1;
+                }
+                if (keyCode === 83 || keyCode === 115) {//S or s
+                    player.walkDown = 1;
+                }
+                if (player.currFrameCount < (frameCount - player.shotSpeed)){
+                    if (keyCode === RIGHT){
+                        player.shootRight = 1;
                     }
                     else if (keyCode === LEFT){
-                        gamestate.level.playerRoomLocation.y--;
+                        player.shootLeft = 1;
                     }
                     else if (keyCode === UP){
-                        gamestate.level.playerRoomLocation.x--;
+                       player.shootUp = 1;
                     }
                     else if (keyCode === DOWN){
-                        gamestate.level.playerRoomLocation.x++;
+                       player.shootDown = 1;
                     }
+                }
                 break;
             case "test":
                 if (keyCode === 68 || keyCode === 100) {//D or d
@@ -1236,7 +1287,32 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 }
                 break;
 
-
+                case "game":
+                if (keyCode === 68 || keyCode === 100) {//D or d
+                    player.walkRight = 0;
+                }
+                if (keyCode === 65 || keyCode === 97) {//A or a
+                    player.walkLeft = 0;
+                }
+                if (keyCode === 87 || keyCode === 119) {//W or w
+                    player.walkUp = 0;
+                }
+                if (keyCode === 83 || keyCode === 115) {//S or s
+                    player.walkDown = 0;
+                }
+                if (keyCode === RIGHT){
+                    player.shootRight = 0;
+                }
+                if (keyCode === LEFT){
+                    player.shootLeft = 0;
+                }
+                if (keyCode === UP){
+                   player.shootUp = 0;
+                }
+                if (keyCode === DOWN){
+                   player.shootDown = 0;
+                }
+                break;
         }
     };
 
@@ -1256,6 +1332,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 break;
             case "game":
                 gamestate.run();
+                player.move();
+                player.draw();
+                player.checkDoors();
                 break;
             case "test":
                 gamestate.run();
