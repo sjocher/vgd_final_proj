@@ -843,15 +843,20 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var eyeballObj = function(x, y){
         this.position = new PVector(x, y);
         this.velocity = new PVector(0, 0);
+        this.angle = PI/4;
         this.w = 100;
         this.h = 100;
-        this.speed = 3;
+        this.speed = 1.5;
         this.life = 50;
+        this.maxLife = 50;
 
         this.up = true;
         this.down = true;
         this.left = true;
         this.right = true;
+
+        this.xdir = 1;
+        this.ydir = 1;
     };
 
     eyeballObj.prototype.draw = function(){
@@ -868,6 +873,39 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         else {
             image(eyeImg, this.position.x, this.position.y, this.w, this.h);
         }
+    };
+
+    eyeballObj.prototype.move = function(){
+        if (this.life === this.maxLife*4/5){
+            this.speed = 2
+        }
+        if (this.life === this.maxLife*3/5){
+            this.speed = 2.5
+        }
+        if (this.life === this.maxLife*2/5){
+            this.speed = 3
+        }
+        if (this.life === this.maxLife*1/5){
+            this.speed = 4
+        }
+        if (this.position.x <= 115 || this.position.x + this.w >= 675 || this.position.y <= 100 || this.position.y + this.h >= 475) {
+            // collision detected!
+            //text("HIT!",200,200);
+            if (this.position.x < 115){
+                this.xdir *= -1;
+            }
+            if (this.position.x + this.w > 675){
+                this.xdir *= -1;
+            }
+            if (this.position.y < 100){
+                this.ydir *= -1;
+            }
+            if (this.position.y + this.h > 475){
+                this.ydir *= -1;
+            }
+        }
+        this.position.x += this.speed*this.xdir;
+        this.position.y += this.speed*this.ydir;
     };
 
     ratObj.prototype.draw = function(){
@@ -1167,8 +1205,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         }
     };
 
-    l00.enemies = [new ratObj(400, 400), new ratObj(400, 200)];
+    //l00.enemies = [new ratObj(400, 400), new ratObj(400, 200)];
     player = new playerObj(200, 200);
+    eye = new eyeballObj(400,300);
 
 
     var drawTest = function () {
@@ -1190,6 +1229,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             enemies[i].draw();
         }
         */
+        eye.move();
+        eye.draw();
         player.move();
         player.draw();
         player.shoot();
