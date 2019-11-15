@@ -207,6 +207,10 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         for(var i = 0; i < this.doors.length; ++i) {
             this.doors[i].draw();
         }
+        for(var i = 0; i < this.enemies.length; ++i){
+            this.enemies[i].move();
+            this.enemies[i].draw();
+        }
     }
 
     var map_data = function(currlevel) {
@@ -653,15 +657,14 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         var result = false;
         if (this.player){
             //shot by player
-            for (var i=0; i<enemies.length; i++){
-                if (this.position.x <=
-                    enemies[i].position.x + enemies[i].w && this.position.x + this.w >= enemies[i].position.x && this.position.y <= enemies[i].position.y + enemies[i].h && this.position.y + this.h >= enemies[i].position.y) {
+            for (var i=0; i<gamestate.drawRoomData.enemies.length; i++){
+                if (this.position.x <= gamestate.drawRoomData.enemies[i].position.x + gamestate.drawRoomData.enemies[i].w && this.position.x + this.w >= gamestate.drawRoomData.enemies[i].position.x && this.position.y <= gamestate.drawRoomData.enemies[i].position.y + gamestate.drawRoomData.enemies[i].h && this.position.y + this.h >= gamestate.drawRoomData.enemies[i].position.y) {
                     // collision detected!
                     result = true;
-                    enemies[i].life -= player.damage;
-                    enemies[i].hit = 1;
-                    if (enemies[i].life <= 0){
-                        enemies.splice(i,1);
+                    gamestate.drawRoomData.enemies[i].life -= player.damage;
+                    gamestate.drawRoomData.enemies[i].hit = 1;
+                    if (gamestate.drawRoomData.enemies[i].life <= 0){
+                        gamestate.drawRoomData.enemies.splice(i,1);
                     }
                 }
             }
@@ -829,7 +832,37 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.hitTime = 0;
 
         this.moveTime = frameCount;
-        this.moveWait = 60;
+        this.moveWait = 150;
+    };
+
+    var eyeballObj = function(x, y){
+        this.position = new PVector(x, y);
+        this.velocity = new PVector(0, 0);
+        this.w = 100;
+        this.h = 100;
+        this.speed = 3;
+        this.life = 50;
+
+        this.up = true;
+        this.down = true;
+        this.left = true;
+        this.right = true;
+    };
+
+    eyeballObj.prototype.draw(){
+        if (this.hit){
+            tint(255,0,0,250);
+            image(ratImg, this.position.x, this.position.y, this.w, this.h);
+            noTint();
+            this.hitTime++;
+            if (this.hitTime === 5){
+                this.hit = 0;
+                this.hitTime = 0;
+            }
+        }
+        else {
+            image(ratImg, this.position.x, this.position.y, this.w, this.h);
+        }
     };
 
     ratObj.prototype.draw = function(){
@@ -850,24 +883,51 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     };
 
     ratObj.prototype.move = function(){
-        ellipse(this.position.x+this.w/2, this.position.y+this.h/2, 240,240);
+        ellipse(this.position.x+this.w/2, this.position.y+this.h/2, 360,360);
 
-        if (this.moveTime < (frameCount + this.moveWait)){
+        this.up = true;
+        this.down = true;
+        this.left = true;
+        this.right = true;
+        this.acceleration.set(0,0);
+
+        checkCollisionWalls(this);
+
+        if (frameCount > (this.moveTime + this.moveWait)){
             this.moveTime = frameCount;
-        }
-        else{
-            if (dist(this.position.x+this.w/2, this.position.y+this.h/2, player.position.x+player.w/2, player.position.y+player.h/2) <= 240) {
+            if (dist(this.position.x+this.w/2, this.position.y+this.h/2, player.position.x+player.w/2, player.position.y+player.h/2) <= 180) {
                 //chase
                 this.step.set(player.position.x - this.position.x, player.position.y - this.position.y);
                 this.step.normalize();
-                this.acceleration.add(this.step);
-                // println(this.step.heading());
+                var angle = this.step.heading();
+                console.log("step: ", angle);
+                this.acceleration.set(cos(angle), sin(angle));
+                this.acceleration.mult(12);
             }
             else{
                 //wander
+                var angle = random(0,2*PI);
+                this.acceleration.set(cos(angle), sin(angle));
+                this.acceleration.mult(12);
 
             }
+            //this.position.x++;
+            //apply one force
         }
+        this.velocity.add(this.acceleration);
+        this.friction.set(this.velocity.x, this.velocity.y);
+        this.friction.mult(this.frictionCoeff);
+        this.velocity.add(this.friction);
+        if (!this.right || !this.left){
+            this.velocity.x = 0;
+        }
+        if (!this.up || !this.down){
+            this.velocity.y = 0;
+        }
+
+        this.position.add(this.velocity);
+
+
 
     };
 
@@ -959,9 +1019,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     };
 
     playerObj.prototype.checkEnemies = function(){
-        for (var i=0; i<enemies.length; i++){
-            if (this.position.x < enemies[i].position.x + enemies[i].w && this.position.x + this.w > enemies[i].position.x && this.position.y < enemies[i].position.y + enemies[i].h && this.position.y + this.h > enemies[i].position.y) {
-                this.life -= enemies[i].damage;
+        for (var i=0; i<gamestate.drawRoomData.enemies.length; i++){
+            if (this.position.x + 12 < gamestate.drawRoomData.enemies[i].position.x + gamestate.drawRoomData.enemies[i].w && this.position.x + this.w - 8 > gamestate.drawRoomData.enemies[i].position.x && this.position.y < gamestate.drawRoomData.enemies[i].position.y + gamestate.drawRoomData.enemies[i].h && this.position.y + this.h > gamestate.drawRoomData.enemies[i].position.y) {
+                this.life -= gamestate.drawRoomData.enemies[i].damage;
                 this.hit = 1;
                 this.hitTime = frameCount;
                 if (this.life <= 0){
@@ -1102,7 +1162,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         }
     };
 
-    enemies = [new ratObj(400, 400), new ratObj(400, 200)];
+    l00.enemies = [new ratObj(400, 400), new ratObj(400, 200)];
     player = new playerObj(200, 200);
 
 
@@ -1119,10 +1179,12 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             rect(0, i*50-25, 800, 1);
         }
         */
+        /*
         for (var i=0; i<enemies.length;i++){
             enemies[i].move();
             enemies[i].draw();
         }
+        */
         player.move();
         player.draw();
         player.shoot();
@@ -1290,8 +1352,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                    player.shootDown = 0;
                 }
                 break;
-
-                case "game":
+            case "game":
                 if (keyCode === 68 || keyCode === 100) {//D or d
                     player.walkRight = 0;
                 }
@@ -1338,6 +1399,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 gamestate.run();
                 player.move();
                 player.draw();
+                player.shoot();
                 player.checkDoors();
                 break;
             case "test":
