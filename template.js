@@ -95,8 +95,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                              [9,9,7,9,9],
                              [9,9,8,9,9]];
 
-    var roomData = function(doors) {
+    var roomData = function(doors, enemies) {
         this.doors = doors;
+        this.enemies = enemies;
     }
 
     //door layout = up, down, left, right
@@ -110,15 +111,15 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var level0_room7 = [1, 1, 0, 0];
     var level0_room8 = [1, 0, 0, 0];
 
-    var l00 = new roomData(level0_room0);
-    var l01 = new roomData(level0_room1);
-    var l02 = new roomData(level0_room2);
-    var l03 = new roomData(level0_room3);
-    var l04 = new roomData(level0_room4);
-    var l05 = new roomData(level0_room5);
-    var l06 = new roomData(level0_room6);
-    var l07 = new roomData(level0_room7);
-    var l08 = new roomData(level0_room8);
+    var l00 = new roomData(level0_room0, []);
+    var l01 = new roomData(level0_room1, []);
+    var l02 = new roomData(level0_room2, []);
+    var l03 = new roomData(level0_room3, []);
+    var l04 = new roomData(level0_room4, []);
+    var l05 = new roomData(level0_room5, []);
+    var l06 = new roomData(level0_room6, []);
+    var l07 = new roomData(level0_room7, []);
+    var l08 = new roomData(level0_room8, []);
 
 
     var level = function(layout, rooms) {
@@ -134,6 +135,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.door_locs = door_locs;
         this.floor = [];
         this.doors = [];
+        this.enemies = [];
         this.loaded = loaded;
     }
 
@@ -217,6 +219,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.roomSpot = this.level.layout[this.level.playerRoomLocation.x][this.level.playerRoomLocation.y];
         this.currRoom = this.level.rooms[this.roomSpot];
         this.drawRoomData.door_locs = this.currRoom.doors;
+        this.drawRoomData.enemies = this.currRoom.enemies;
         this.drawRoomData.load();
         this.drawRoomData.draw();
     }
@@ -651,7 +654,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         if (this.player){
             //shot by player
             for (var i=0; i<enemies.length; i++){
-                if (this.position.x <= enemies[i].position.x + enemies[i].w && this.position.x + this.w >= enemies[i].position.x && this.position.y <= enemies[i].position.y + enemies[i].h && this.position.y + this.h >= enemies[i].position.y) {
+                if (this.position.x <=
+                    enemies[i].position.x + enemies[i].w && this.position.x + this.w >= enemies[i].position.x && this.position.y <= enemies[i].position.y + enemies[i].h && this.position.y + this.h >= enemies[i].position.y) {
                     // collision detected!
                     result = true;
                     enemies[i].life -= player.damage;
