@@ -11,6 +11,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     size(800, 600);
     frameRate(60);
+    angleMode = "radians";
 
     /* TILEMAPS 15 x 11 */
 
@@ -586,6 +587,14 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.timeEnd = time;
         this.player = player; //true if fired from player
         this.speed = 5;
+
+        this.w = 20;
+        this.h = 20;
+
+        this.up = true;
+        this.down = true;
+        this.left = true;
+        this.right = true;
     };
 
     arrowObj.prototype.draw = function(){
@@ -593,23 +602,66 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             return false;
         }
         else{
-            image(arrow, this.position.x, this.position.y, 20, 10);
+            //image(arrow, this.position.x, this.position.y, 20, 10);
+
+            this.up = true;
+            this.down = true;
+            this.left = true;
+            this.right = true;
+            checkCollisionWalls(this);
+
             var step = new PVector(0,0);
             step.add(this.velocity);
             step.mult(0.25);
             this.position.add(step);
             switch (this.direction){
                 case 0: //right
-                        this.position.x += this.speed;
+                        if(this.right){
+                            image(arrow, this.position.x, this.position.y, this.w, this.h);
+                            this.position.x += this.speed;
+                        }
+                        else{
+                            return false;
+                        }
                         break;
                 case 1:
-                        this.position.y += this.speed;
+                        if(this.down) {
+                            pushMatrix();
+                            translate(this.position.x + this.w / 2, this.position.y + this.h / 2);
+                            rotate(PI / 2);
+                            image(arrow, -this.w / 2, -this.h / 2, this.w, this.h);
+                            popMatrix();
+                            this.position.y += this.speed;
+                        }
+                        else{
+                            return false;
+                        }
                         break;
                 case 2:
-                        this.position.x -= this.speed;
+                        if(this.left) {
+                            pushMatrix();
+                            translate(this.position.x + this.w / 2, this.position.y + this.h / 2);
+                            rotate(PI);
+                            image(arrow, -this.w / 2, -this.h / 2, this.w, this.h);
+                            popMatrix();
+                            this.position.x -= this.speed;
+                        }
+                        else{
+                            return false;
+                        }
                         break;
                 case 3:
-                        this.position.y -= this.speed;
+                        if(this.up) {
+                            pushMatrix();
+                            translate(this.position.x + this.w / 2, this.position.y + this.h / 2);
+                            rotate(-PI / 2);
+                            image(arrow, -this.w / 2, -this.h / 2, this.w, this.h);
+                            popMatrix();
+                            this.position.y -= this.speed;
+                        }
+                        else {
+                            return false;
+                        }
                         break;
             }
         }
