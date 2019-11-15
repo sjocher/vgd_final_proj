@@ -77,69 +77,61 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         image(this.file, this.x, this.y, 50, 50);
     }
 
-    var room0 =    ["ccccccccccccccc",
-                    "c<uuuuu^uuuuu>c",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "c[-----------]c",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "c{dddddvddddd}c",
-                    "ccccccccccccccc"];
+    var room_layout =  ["ccccccccccccccc",
+                        "c<uuuuuuuuuuu>c",
+                        "cl-----------rc",
+                        "cl-----------rc",
+                        "cl-----------rc",
+                        "cl-----------rc",
+                        "cl-----------rc",
+                        "cl-----------rc",
+                        "cl-----------rc",
+                        "c{ddddddddddd}c",
+                        "ccccccccccccccc"];
 
-    var room1 =    ["ccccccccccccccc",
-                    "c<uuuuuuuuuuu>c",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "c{dddddvddddd}c",
-                    "ccccccccccccccc"];
+    var level0_layout =      [[9,9,2,3,9],
+                             [9,9,1,9,9],
+                             [6,5,0,4,9],
+                             [9,9,7,9,9],
+                             [9,9,8,9,9]];
 
-    var room2 =    ["ccccccccccccccc",
-                    "c<uuuuuuuuuuu>c",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "c[-----------rc",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "c{ddddddddddd}c",
-                    "ccccccccccccccc"];
+    var roomData = function(doors) {
+        this.doors = doors;
+    }
 
-    var room3 =    ["ccccccccccccccc",
-                    "c<uuuuu^uuuuu>c",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "c{ddddddddddd}c",
-                    "ccccccccccccccc"];
+    //door layout = up, down, left, right
+    var level0_room0 = [1, 1, 1, 1];
+    var level0_room1 = [1, 1, 0, 0];
+    var level0_room2 = [0, 1, 0, 1];
+    var level0_room3 = [0, 0, 1, 0];
+    var level0_room4 = [0, 0, 1, 0];
+    var level0_room5 = [0, 0, 1, 1];
+    var level0_room6 = [0, 0, 0, 1];
+    var level0_room7 = [1, 1, 0, 0];
+    var level0_room8 = [1, 0, 0, 0];
 
-    var room4 =    ["ccccccccccccccc",
-                    "c<uuuuuuuuuuu>c",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "cl-----------]c",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "cl-----------rc",
-                    "c{ddddddddddd}c",
-                    "ccccccccccccccc"];
+    var l00 = new roomData(level0_room0);
+    var l01 = new roomData(level0_room1);
+    var l02 = new roomData(level0_room2);
+    var l03 = new roomData(level0_room3);
+    var l04 = new roomData(level0_room4);
+    var l05 = new roomData(level0_room5);
+    var l06 = new roomData(level0_room6);
+    var l07 = new roomData(level0_room7);
+    var l08 = new roomData(level0_room8);
 
-    var room = function(curr, loaded) {
-        this.currRoom = curr;
+
+    var level = function(layout, rooms) {
+        this.layout = layout
+        this.rooms = rooms;
+        this.playerRoomLocation = new PVector(2, 2);
+    }
+
+    var level0 = new level(level0_layout, [l00, l01, l02, l03, l04, l05, l06, l07, l08]);
+
+    var room = function(loaded, door_locs) {
         this.walls = [];
+        this.door_locs = door_locs;
         this.floor = [];
         this.doors = [];
         this.loaded = loaded;
@@ -150,53 +142,55 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             this.walls = [];
             this.doors = [];
             this.floor = [];
-            for(var i = 0; i < this.currRoom.length; ++i) {
-                for(var j = 0; j < this.currRoom[0].length; ++j) {
-                    if(this.currRoom[i][j] === 'l') {
+            //load the doorskis bro, x, y, image, direction, open
+            if(this.door_locs[0] === 1) {
+                this.doors.push(new doorObj(375, 75, door_up, "up", 1));
+            }
+            if(this.door_locs[1] === 1) {
+                this.doors.push(new doorObj(375, 475, door_down, "down", 1));
+            }
+            if(this.door_locs[2] === 1) {
+                this.doors.push(new doorObj(75, 275, door_left, "left", 1));
+            }
+            if(this.door_locs[3] === 1) {
+                this.doors.push(new doorObj(675, 275, door_right, "right", 1));
+            }
+            //
+            for(var i = 0; i < room_layout.length; ++i) {
+                for(var j = 0; j < room_layout[0].length; ++j) {
+                    if(room_layout[i][j] === 'l') {
                         this.walls.push(new wallObj(j*50 + 25, i*50 + 25, wall_left));
                     }
-                    if(this.currRoom[i][j] === 'u') {
+                    if(room_layout[i][j] === 'u') {
                         this.walls.push(new wallObj(j*50 + 25, i*50 + 25, wall_top));
                     }
-                    if(this.currRoom[i][j] === 'd') {
+                    if(room_layout[i][j] === 'd') {
                         this.walls.push(new wallObj(j*50 + 25, i*50 + 25, wall_down));
                     }
-                    if(this.currRoom[i][j] === 'r') {
+                    if(room_layout[i][j] === 'r') {
                         this.walls.push(new wallObj(j*50 + 25, i*50 + 25, wall_right));
                     }
-                    if(this.currRoom[i][j] === '-') {
+                    if(room_layout[i][j] === '-') {
                         this.floor.push(new floorObj(j*50 + 25, i*50 + 25, floor_block));
                     }
-                    if(this.currRoom[i][j] === 'c') {
+                    if(room_layout[i][j] === 'c') {
                         this.floor.push(new floorObj(j*50 + 25, i*50 + 25, cobble));
                     }
-                    if(this.currRoom[i][j] === '<') {
+                    if(room_layout[i][j] === '<') {
                         this.walls.push(new wallObj(j*50 + 25, i*50 + 25, UL));
                     }
-                    if(this.currRoom[i][j] === '>') {
+                    if(room_layout[i][j] === '>') {
                         this.walls.push(new wallObj(j*50 + 25, i*50 + 25, UR));
                     }
-                    if(this.currRoom[i][j] === '{') {
+                    if(room_layout[i][j] === '{') {
                         this.walls.push(new wallObj(j*50 + 25, i*50 + 25, BL));
                     }
-                    if(this.currRoom[i][j] === '}') {
+                    if(room_layout[i][j] === '}') {
                         this.walls.push(new wallObj(j*50 + 25, i*50 + 25, LR));
-                    }
-                    if(this.currRoom[i][j] === '[') {
-                        this.doors.push(new doorObj(j*50 + 25, i*50 + 25, door_left, "left", 1));
-                    }
-                    if(this.currRoom[i][j] === ']') {
-                        this.doors.push(new doorObj(j*50 + 25, i*50 + 25, door_right, "right", 1));
-                    }
-                    if(this.currRoom[i][j] === '^') {
-                        this.doors.push(new doorObj(j*50 + 25, i*50 + 25, door_up, "up", 1));
-                    }
-                    if(this.currRoom[i][j] === 'v') {
-                        this.doors.push(new doorObj(j*50 + 25, i*50 + 25, door_down, "down", 1));
                     }
                 }
             }
-            this.loaded = 1;
+            this.loaded = 0;
         }
     }
     
@@ -205,15 +199,29 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         for(var i = 0; i < this.walls.length; ++i) {
             this.walls[i].draw();
         }
-        for(var i = 0; i < this.doors.length; ++i) {
-            this.doors[i].draw();
-        }
         for(var i = 0; i < this.floor.length; ++i) {
             this.floor[i].draw();
         }
+        for(var i = 0; i < this.doors.length; ++i) {
+            this.doors[i].draw();
+        }
     }
 
-    var game = new room(room0, 0);
+    var map_data = function(currlevel) {
+        this.level = currlevel; //consists of level.layout, and level.rooms
+        this.drawRoomData = new room(0, []);
+    }
+
+    map_data.prototype.run = function() {
+        console.log(this.level.playerRoomLocation.x + " " + this.level.playerRoomLocation.y)
+        this.roomSpot = this.level.layout[this.level.playerRoomLocation.x][this.level.playerRoomLocation.y];
+        this.currRoom = this.level.rooms[this.roomSpot];
+        this.drawRoomData.door_locs = this.currRoom.doors;
+        this.drawRoomData.load();
+        this.drawRoomData.draw();
+    }
+
+    var gamestate = new map_data(level0);
 
     //Functions to load the rooms
 
@@ -747,7 +755,6 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.currFrameCount = 0; //time of shooting
         this.arrows = [];
 
-
     };
 
     playerObj.prototype.applyForce = function (force) {
@@ -994,6 +1001,20 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                     state = "menu";
                 }
                 break;
+            case "game":
+                if (keyCode === RIGHT){
+                        gamestate.level.playerRoomLocation.y++;
+                    }
+                    else if (keyCode === LEFT){
+                        gamestate.level.playerRoomLocation.y--;
+                    }
+                    else if (keyCode === UP){
+                        gamestate.level.playerRoomLocation.x--;
+                    }
+                    else if (keyCode === DOWN){
+                        gamestate.level.playerRoomLocation.x++;
+                    }
+                break;
             case "test":
                 if (keyCode === 68 || keyCode === 100) {//D or d
                     player.walkRight = 1;
@@ -1074,8 +1095,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 drawInstructions();
                 break;
             case "game":
-                game.load();
-                game.draw();
+                gamestate.run();
                 break;
             case "test":
                 game.load();
