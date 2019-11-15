@@ -854,10 +854,10 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.right = true;
     };
 
-    eyeballObj.prototype.draw(){
+    eyeballObj.prototype.draw = function(){
         if (this.hit){
             tint(255,0,0,250);
-            image(ratImg, this.position.x, this.position.y, this.w, this.h);
+            image(eyeImg, this.position.x, this.position.y, this.w, this.h);
             noTint();
             this.hitTime++;
             if (this.hitTime === 5){
@@ -866,7 +866,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             }
         }
         else {
-            image(ratImg, this.position.x, this.position.y, this.w, this.h);
+            image(eyeImg, this.position.x, this.position.y, this.w, this.h);
         }
     };
 
