@@ -37,7 +37,43 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     }
 
     var room0 =    ["ccccccccccccccc",
+                    "c<uuuuu^uuuuu>c",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "c[-----------]c",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "c{dddddvddddd}c",
+                    "ccccccccccccccc"];
+
+    var room1 =    ["ccccccccccccccc",
                     "c<uuuuuuuuuuu>c",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "c{dddddvddddd}c",
+                    "ccccccccccccccc"];
+
+    var room2 =    ["ccccccccccccccc",
+                    "c<uuuuuuuuuuu>c",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "c[-----------rc",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "c{ddddddddddd}c",
+                    "ccccccccccccccc"];
+
+    var room3 =    ["ccccccccccccccc",
+                    "c<uuuuu^uuuuu>c",
                     "cl-----------rc",
                     "cl-----------rc",
                     "cl-----------rc",
@@ -48,9 +84,21 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                     "c{ddddddddddd}c",
                     "ccccccccccccccc"];
 
+    var room4 =    ["ccccccccccccccc",
+                    "c<uuuuuuuuuuu>c",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "cl-----------]c",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "cl-----------rc",
+                    "c{ddddddddddd}c",
+                    "ccccccccccccccc"];
     var room = function(curr, loaded) {
-        this.currRoom = room0;
+        this.currRoom = curr;
         this.walls = [];
+        this.doors = [];
         this.loaded = loaded;
     }
 
@@ -89,6 +137,18 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                     if(this.currRoom[i][j] === '}') {
                         this.walls.push(new floorObj(j*50 + 25, i*50 + 25, LR));
                     }
+                    if(this.currRoom[i][j] === '[') {
+                        this.doors.push(new floorObj(j*50 + 25, i*50 + 25, door_left));
+                    }
+                    if(this.currRoom[i][j] === ']') {
+                        this.doors.push(new floorObj(j*50 + 25, i*50 + 25, door_right));
+                    }
+                    if(this.currRoom[i][j] === '^') {
+                        this.doors.push(new floorObj(j*50 + 25, i*50 + 25, door_up));
+                    }
+                    if(this.currRoom[i][j] === 'v') {
+                        this.doors.push(new floorObj(j*50 + 25, i*50 + 25, door_down));
+                    }
                 }
             }
             this.loaded = 1;
@@ -99,6 +159,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         background(0,0,0);
         for(var i = 0; i < this.walls.length; ++i) {
             this.walls[i].draw();
+        }
+        for(var i = 0; i < this.doors.length; ++i) {
+            this.doors[i].draw();
         }
     }
 
@@ -431,6 +494,10 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var UR = loadImage("./images/UR.png");
     var BL = loadImage("./images/BL.png");
     var LR = loadImage("./images/LR.png");
+    var door_left = loadImage("./images/door_left.png");
+    var door_right = loadImage("./images/door_right.png");
+    var door_up = loadImage("./images/door_up.png");
+    var door_down = loadImage("./images/door_down.png");
     var drawCredits = function () {
         background(0, 0, 0);
         fill(255, 255, 255);
