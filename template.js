@@ -797,6 +797,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.position = new PVector(x, y);
         this.velocity = new PVector(0, 0);
         this.acceleration = new PVector(0, 0);
+        this.step = new PVector(0,0);
         this.force = new PVector(0, 0);
 
         this.life = 6;
@@ -823,7 +824,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.hit = 0;
         this.hitTime = 0;
 
-        this.move = frameCount;
+        this.moveTime = frameCount;
         this.moveWait = 60;
     };
 
@@ -847,17 +848,21 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     ratObj.prototype.move = function(){
         ellipse(this.position.x+this.w/2, this.position.y+this.h/2, 240,240);
 
-        if (this.move < (frameCount + this.moveWait)){
-            this.move = frameCount;
-            this.position.x--;
-        }
-        if (dist(this.position.x+this.w/2, this.position.y+this.h/2, player.position.x+player.w/2, player.position.y+player.h/2) <= 240) {
-            //chase
-
+        if (this.moveTime < (frameCount + this.moveWait)){
+            this.moveTime = frameCount;
         }
         else{
-            //wander
+            if (dist(this.position.x+this.w/2, this.position.y+this.h/2, player.position.x+player.w/2, player.position.y+player.h/2) <= 240) {
+                //chase
+                this.step.set(player.position.x - this.position.x, player.position.y - this.position.y);
+                this.step.normalize();
+                this.acceleration.add(this.step);
+                // println(this.step.heading());
+            }
+            else{
+                //wander
 
+            }
         }
 
     };
@@ -1253,8 +1258,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 gamestate.run();
                 break;
             case "test":
-                game.load();
-                game.draw();
+                gamestate.run();
                 drawTest();
                 break;
             case "gameover":
