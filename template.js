@@ -14,6 +14,46 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     /* TILEMAPS 15 x 11 */
 
+    var doorObj = function(x ,y, file, direction, open) {
+        this.x = x;
+        this.y = y;
+        this.w = 50;
+        this.h = 50;
+        this.file = file;
+        this.direction = direction;
+        this.open = open;
+    }
+    
+    doorObj.prototype.draw = function() {
+        switch(this.open) {
+            case 0:
+                pushMatrix();
+                translate(this.x + 25, this.y + 25);
+                switch(this.direction) {
+                    case "up":
+                        image(door_closed, -25, -25, this.w, this.h);
+                        break;
+                    case "down":
+                        rotate(PI);
+                        image(door_closed, -25, -25, this.w, this.h);
+                        break;
+                    case "left":
+                        rotate(-PI/2);
+                        image(door_closed, -25, -25, this.w, this.h);
+                        break;
+                    case "right":
+                        rotate(PI/2);
+                        image(door_closed, -25, -25, this.w, this.h);
+                        break;
+                }
+                popMatrix();
+                break;
+            case 1:
+                image(this.file, this.x, this.y, this.w, this.h);
+                break;
+        }
+    }
+
     var wallObj = function(x, y, file) {
         this.x = x;
         this.y = y;
@@ -142,16 +182,16 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                         this.walls.push(new wallObj(j*50 + 25, i*50 + 25, LR));
                     }
                     if(this.currRoom[i][j] === '[') {
-                        this.doors.push(new floorObj(j*50 + 25, i*50 + 25, door_left));
+                        this.doors.push(new doorObj(j*50 + 25, i*50 + 25, door_left, "left", 1));
                     }
                     if(this.currRoom[i][j] === ']') {
-                        this.doors.push(new floorObj(j*50 + 25, i*50 + 25, door_right));
+                        this.doors.push(new doorObj(j*50 + 25, i*50 + 25, door_right, "right", 1));
                     }
                     if(this.currRoom[i][j] === '^') {
-                        this.doors.push(new floorObj(j*50 + 25, i*50 + 25, door_up));
+                        this.doors.push(new doorObj(j*50 + 25, i*50 + 25, door_up, "up", 1));
                     }
                     if(this.currRoom[i][j] === 'v') {
-                        this.doors.push(new floorObj(j*50 + 25, i*50 + 25, door_down));
+                        this.doors.push(new doorObj(j*50 + 25, i*50 + 25, door_down, "down", 1));
                     }
                 }
             }
@@ -506,6 +546,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var door_up = loadImage("./images/door_up.png");
     var door_down = loadImage("./images/door_down.png");
     var arrow = loadImage("./images/arrow.png");
+    var door_closed = loadImage("./images/door_closed.png");
     var drawCredits = function () {
         background(0, 0, 0);
         fill(255, 255, 255);
