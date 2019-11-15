@@ -600,20 +600,20 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var checkCollisionWalls = function(obj){
         //check for walls
         var collision = 0;
-        if (obj.position.x <= 125 || obj.position.x + obj.w >= 675 || obj.position.y <= 125 || obj.position.y + obj.h >= 475) {
+        if (obj.position.x <= 115 || obj.position.x + obj.w >= 675 || obj.position.y <= 100 || obj.position.y + obj.h >= 475) {
             // collision detected!
-            text("HIT!",200,200);
-            if (obj.position.x < 125){
+            //text("HIT!",200,200);
+            if (obj.position.x < 115){
                 obj.left = false;
-                obj.position.x = 125;
+                obj.position.x = 115;
             }
             if (obj.position.x + obj.w > 675){
                 obj.right = false;
                 obj.position.x = 675 - obj.w;
             }
-            if (obj.position.y < 125){
+            if (obj.position.y < 100){
                 obj.up = false;
-                obj.position.y = 125;
+                obj.position.y = 100;
             }
             if (obj.position.y + obj.h > 475){
                 obj.down = false;
@@ -646,6 +646,31 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.right = true;
     };
 
+    arrowObj.prototype.checkCollision = function(){
+        var result = false;
+        if (this.player){
+            //shot by player
+            for (var i=0; i<enemies.length; i++){
+                if (this.position.x <= enemies[i].position.x + enemies[i].w && this.position.x + this.w >= enemies[i].position.x && this.position.y <= enemies[i].position.y + enemies[i].h && this.position.y + this.h >= enemies[i].position.y) {
+                    // collision detected!
+                    result = true;
+                    enemies[i].life -= player.damage;
+                    enemies[i].hit = 1;
+                    if (enemies[i].life <= 0){
+                        enemies.splice(i,1);
+                    }
+                }
+            }
+        }
+        else{
+            //shot by enemy at player
+            //if enemy shoots
+            //check for hit otherwise dont
+        }
+
+        return result;
+    };
+
     arrowObj.prototype.draw = function(){
         if (frameCount >= (this.currFrameCount+this.timeEnd)){
             return false;
@@ -657,6 +682,10 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             this.down = true;
             this.left = true;
             this.right = true;
+            var hit = this.checkCollision();
+            if (hit){
+                return false;
+            }
             checkCollisionWalls(this);
 
             var step = new PVector(0,0);
@@ -726,6 +755,12 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         this.life = 6;
         this.maxLife = 6;
+        this.hit = 0;
+        this.hitTime = 0;
+        this.hitBuffer = 120;
+        this.hitCount = 0;
+        this.blink = 0;
+        this.blinkCount = 0;
         this.w = 50;
         this.h = 50;
 
@@ -755,6 +790,76 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.currFrameCount = 0; //time of shooting
         this.arrows = [];
 
+        this.damage = 1;
+    };
+
+    var ratObj = function(x, y) {
+        this.position = new PVector(x, y);
+        this.velocity = new PVector(0, 0);
+        this.acceleration = new PVector(0, 0);
+        this.force = new PVector(0, 0);
+
+        this.life = 6;
+        this.w = 50;
+        this.h = 30;
+
+        //collision
+        this.up = true;
+        this.down = true;
+        this.left = true;
+        this.right = true;
+
+        this.walkRight = 0;
+        this.walkLeft = 0;
+        this.walkUp = 0;
+        this.walkDown = 0;
+        this.maxSpeed = 3;
+        this.frictionCoeff = -0.1;
+        this.friction = new PVector(0, 0);
+        this.forceCoeff = 0.1;
+
+        this.damage = 1;
+
+        this.hit = 0;
+        this.hitTime = 0;
+
+        this.move = frameCount;
+        this.moveWait = 60;
+    };
+
+    ratObj.prototype.draw = function(){
+        if (this.hit){
+            tint(255,0,0,250);
+            image(ratImg, this.position.x, this.position.y, this.w, this.h);
+            noTint();
+            this.hitTime++;
+            if (this.hitTime === 5){
+                this.hit = 0;
+                this.hitTime = 0;
+            }
+        }
+        else {
+            image(ratImg, this.position.x, this.position.y, this.w, this.h);
+        }
+
+    };
+
+    ratObj.prototype.move = function(){
+        ellipse(this.position.x+this.w/2, this.position.y+this.h/2, 240,240);
+
+        if (this.move < (frameCount + this.moveWait)){
+            this.move = frameCount;
+            this.position.x--;
+        }
+        if (dist(this.position.x+this.w/2, this.position.y+this.h/2, player.position.x+player.w/2, player.position.y+player.h/2) <= 240) {
+            //chase
+
+        }
+        else{
+            //wander
+
+        }
+
     };
 
     playerObj.prototype.applyForce = function (force) {
@@ -767,8 +872,45 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         fill(0,0,0,150);
         ellipse(this.position.x +this.w/2+3, this.position.y+this.h-4, 40, this.h/2-10);
         noFill();
-        rect(this.position.x +12, this.position.y, 30, this.h);
-        image(playerImg, this.position.x, this.position.y, this.w, this.h);
+        //rect(this.position.x +12, this.position.y, 30, this.h);
+        if (this.hit){
+            //text("HIT!", 400, 400);
+            tint(255,0,0,250);
+            //rect(this.position.x, this.position.y, this.w, this.h);
+            image(playerImg, this.position.x, this.position.y, this.w, this.h);
+            noTint();
+            this.hitCount++;
+            if (this.hitCount === 10){
+                this.hit = 0;
+                this.hitCount = 0;
+            }
+
+        }
+        else {
+            if (frameCount > (this.hitTime + this.hitBuffer) || frameCount < this.hitBuffer) {
+                image(playerImg, this.position.x, this.position.y, this.w, this.h);
+            }
+            else {
+                //blink
+                if (!this.blink){
+                    this.blinkCount++;
+                    if (this.blinkCount === 3){
+                        this.blinkCount = 0;
+                        this.blink = 1;
+                    }
+                }
+                else{
+                    image(playerImg, this.position.x, this.position.y, this.w, this.h);
+                    this.blinkCount++;
+                    if (this.blinkCount === 3){
+                        this.blinkCount = 0;
+                        this.blink = 0;
+                    }
+                }
+                //image(playerImg, this.position.x, this.position.y, this.w, this.h);
+            }
+        }
+        //image(playerImg, this.position.x, this.position.y, this.w, this.h);
         for (var i=0; i<this.arrows.length; i++){
             var alive = this.arrows[i].draw();
             if (!alive){
@@ -805,6 +947,20 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             image(halfHeartImg, 40*fillHearts+30, 30, 40, 40);
         }
 
+    };
+
+    playerObj.prototype.checkEnemies = function(){
+        for (var i=0; i<enemies.length; i++){
+            if (this.position.x < enemies[i].position.x + enemies[i].w && this.position.x + this.w > enemies[i].position.x && this.position.y < enemies[i].position.y + enemies[i].h && this.position.y + this.h > enemies[i].position.y) {
+                this.life -= enemies[i].damage;
+                this.hit = 1;
+                this.hitTime = frameCount;
+                if (this.life <= 0){
+                    //GAMEOVER
+                }
+
+            }
+        }
     };
 
     playerObj.prototype.move = function () {
@@ -870,18 +1026,12 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         this.acceleration.set(0, 0);
 
+        //check for enemies
+        if (frameCount > (this.hitTime + this.hitBuffer)) {
+            //this.hit = 0;
+            this.checkEnemies();
+        }
 
-        //testing code
-        if (this.position.x > 800) {
-            this.position.x = -this.w;
-        } else if (this.position.x < -this.w) {
-            this.position.x = 800;
-        }
-        if (this.position.y > 600) {
-            this.position.y = -this.h;
-        } else if (this.position.y < -this.h) {
-            this.position.y = 600;
-        }
 
     };
 
@@ -906,6 +1056,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         }
     };
 
+    enemies = [new ratObj(400, 400), new ratObj(400, 200)];
     player = new playerObj(200, 200);
 
 
@@ -922,6 +1073,10 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             rect(0, i*50-25, 800, 1);
         }
         */
+        for (var i=0; i<enemies.length;i++){
+            enemies[i].move();
+            enemies[i].draw();
+        }
         player.move();
         player.draw();
         player.shoot();
