@@ -15,6 +15,17 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     /* TILEMAPS 15 x 11 */
 
+    var stairObj = function(x, y, collected) {
+        this.pos.x = new PVector(x, y);
+        this.w = 50;
+        this.h = 50;
+        this.collected = collected;
+    }
+
+    stairObj.prototype.draw = function() {
+        image(stairIMG, this.pos.x, this.pos.y, this.w, this.h);
+    }
+
     var doorObj = function(x ,y, file, direction, open) {
         this.x = x;
         this.y = y;
@@ -568,7 +579,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var door_down = loadImage("./images/door_down.png");
     var arrow = loadImage("./images/arrow.png");
     var door_closed = loadImage("./images/door_closed.png");
-    var stairs = loadImage("./images/stair.png");
+    var stairIMG = loadImage("./images/stairs.png");
     var drawCredits = function () {
         background(0, 0, 0);
         fill(255, 255, 255);
@@ -1261,7 +1272,14 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         }
     };
 
-    //l00.enemies = [new ratObj(400, 400), new ratObj(400, 200)];
+    l01.enemies = [new ratObj(400, 200), new ratObj(300, 200), new ratObj(250, 300)];
+    l02.enemies = [new ratObj(400, 200), new ratObj(300, 200)];
+    l03.enemies = [new eyeballObj(400, 300)];
+    l04.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
+    l05.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
+    l06.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
+    l07.enemies = [new ratObj(500, 200), new ratObj(400, 250)];
+
     player = new playerObj(375, 275);
     //l01.enemies = [new knightObj(200, 200)];
 
