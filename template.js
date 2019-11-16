@@ -858,6 +858,10 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         this.xdir = 1;
         this.ydir = 1;
+        this.damage = 1;
+
+        this.hit = 0;
+        this.hitTime = 0;
     };
 
     eyeballObj.prototype.draw = function(){
@@ -865,8 +869,10 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             tint(255,0,0,250);
             image(eyeImg, this.position.x, this.position.y, this.w, this.h);
             noTint();
+
+            //image(eyeImg, this.position.x, this.position.y, this.w, this.h);
             this.hitTime++;
-            if (this.hitTime === 5){
+            if (this.hitTime === 3){
                 this.hit = 0;
                 this.hitTime = 0;
             }
@@ -874,6 +880,21 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         else {
             image(eyeImg, this.position.x, this.position.y, this.w, this.h);
         }
+
+        noStroke();
+        fill(255,0,0);
+        for (var i=0;i<this.life; i++){
+            rect(300+i*4, 530, 4, 40);
+        }
+        fill(0,0,0);
+        for (var i=0; i<4; i++){
+            rect(340+i*40, 530, 1, 40);
+        }
+        stroke(0,0,0);
+        strokeWeight(5);
+        noFill();
+        rect(300, 530, 200, 40, 5);
+        noStroke();
     };
 
     eyeballObj.prototype.move = function(){
@@ -1209,8 +1230,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     };
 
     //l00.enemies = [new ratObj(400, 400), new ratObj(400, 200)];
-    player = new playerObj(200, 200);
-    eye = new eyeballObj(400,300);
+    player = new playerObj(375, 275);
+    //l00.enemies = [new eyeballObj(400,300)];
 
 
     var drawTest = function () {
@@ -1232,8 +1253,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             enemies[i].draw();
         }
         */
-        eye.move();
-        eye.draw();
+        //eye.move();
+        //eye.draw();
         player.move();
         player.draw();
         player.shoot();
