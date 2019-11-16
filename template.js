@@ -907,9 +907,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     eyeballObj.prototype.draw = function(){
         if (this.hit){
-            tint(255,0,0,250);
+            //tint(255,0,0,250);
             image(eyeImg, this.position.x, this.position.y, this.w, this.h);
-            noTint();
+            //noTint();
 
             //image(eyeImg, this.position.x, this.position.y, this.w, this.h);
             this.hitTime++;
@@ -973,9 +973,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     ratObj.prototype.draw = function(){
         if (this.hit){
-            tint(255,0,0,250);
+            //tint(255, 0,0,250);
             image(ratImg, this.position.x, this.position.y, this.w, this.h);
-            noTint();
+            //noTint();
             this.hitTime++;
             if (this.hitTime === 5){
                 this.hit = 0;
@@ -1050,10 +1050,10 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         //rect(this.position.x +12, this.position.y, 30, this.h);
         if (this.hit){
             //text("HIT!", 400, 400);
-            tint(255,0,0,250);
+            //tint(255,0,0,250);
             //rect(this.position.x, this.position.y, this.w, this.h);
             image(playerImg, this.position.x, this.position.y, this.w, this.h);
-            noTint();
+            //noTint();
             this.hitCount++;
             if (this.hitCount === 10){
                 this.hit = 0;
