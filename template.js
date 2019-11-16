@@ -568,6 +568,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var door_down = loadImage("./images/door_down.png");
     var arrow = loadImage("./images/arrow.png");
     var door_closed = loadImage("./images/door_closed.png");
+    var stairs = loadImage("./images/stair.png");
     var drawCredits = function () {
         background(0, 0, 0);
         fill(255, 255, 255);
