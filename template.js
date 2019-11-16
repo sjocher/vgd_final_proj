@@ -821,7 +821,6 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.velocity = new PVector(0, 0);
         this.acceleration = new PVector(0, 0);
         this.step = new PVector(0,0);
-        this.force = new PVector(0, 0);
 
         this.life = 6;
         this.w = 50;
@@ -833,14 +832,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.left = true;
         this.right = true;
 
-        this.walkRight = 0;
-        this.walkLeft = 0;
-        this.walkUp = 0;
-        this.walkDown = 0;
-        this.maxSpeed = 3;
         this.frictionCoeff = -0.1;
         this.friction = new PVector(0, 0);
-        this.forceCoeff = 0.1;
 
         this.damage = 1;
 
@@ -872,6 +865,44 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         this.hit = 0;
         this.hitTime = 0;
+    };
+
+    var knightObj = function(x, y) {
+        this.position = new PVector(x, y);
+        this.velocity = new PVector(0, 0);
+        this.acceleration = new PVector(0, 0);
+        this.step = new PVector(0,0);
+
+        this.life = 6;
+        this.w = 50;
+        this.h = 50;
+
+        //collision
+        this.up = true;
+        this.down = true;
+        this.left = true;
+        this.right = true;
+
+        this.frictionCoeff = -0.1;
+        this.friction = new PVector(0, 0);
+
+        this.damage = 1;
+
+        this.hit = 0;
+        this.hitTime = 0;
+
+        this.moveTime = frameCount;
+        this.moveWait = 150;
+    };
+
+    knightObj.prototype.draw = function(){
+        image(knightImg, this.position.x, this.position.y, this.w, this.h);
+
+    };
+
+    knightObj.prototype.move = function(){
+
+
     };
 
     eyeballObj.prototype.draw = function(){
@@ -1101,6 +1132,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 this.hitTime = frameCount;
                 if (this.life <= 0){
                     //GAMEOVER
+                    state = "gameover";
                 }
 
             }
@@ -1285,6 +1317,24 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         player.shoot();
     };
 
+    /* GAMEOVER */
+    var drawGameOver = function(){
+        stroke(0,0,0);
+        strokeWeight(5);
+        fill(130,130,130);
+        rect(175, 200, 450, 200, 20);
+        textSize(64);
+        textAlign(CENTER);
+        fill(0,0,0);
+        text("GAME OVER",400, 300);
+        textSize(32);
+        text("Main Menu\nEnter", 400, 350);
+
+        player = new playerObj(375,275);
+        textAlign(LEFT);
+
+    };
+
 
     /* Main Draw and Key Input Area */
 
@@ -1314,12 +1364,14 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                         menu.state++;
                     }
                 }
+                /*
                 if (keyCode === 32) {
                     //SPACE
                     rainSound.stop();
                     state = "test";
                     break;
                 }
+                */
                 if (keyCode === ENTER) {
                     switch (menu.state) {
                         case -1:
@@ -1387,6 +1439,12 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                     }
                 }
                 break;
+            case "gameover":
+                if (keyCode === ENTER) {
+                    state = "menu";
+                }
+                break;
+            /*
             case "test":
                 if (keyCode === 68 || keyCode === 100) {//D or d
                     player.walkRight = 1;
@@ -1415,7 +1473,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                     }
                 }
                 break;
-
+             */
         }
     };
 
@@ -1503,6 +1561,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 drawTest();
                 break;
             case "gameover":
+                drawGameOver();
                 break;
         }
         //drawSky();
