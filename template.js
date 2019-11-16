@@ -1332,7 +1332,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         player = new playerObj(375,275);
         textAlign(LEFT);
-
+        gamestate.reset = 1;
     };
 
 
