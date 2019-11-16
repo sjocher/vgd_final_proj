@@ -1357,12 +1357,14 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                         menu.state++;
                     }
                 }
+                /*
                 if (keyCode === 32) {
                     //SPACE
                     rainSound.stop();
                     state = "test";
                     break;
                 }
+                */
                 if (keyCode === ENTER) {
                     switch (menu.state) {
                         case -1:
