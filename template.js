@@ -230,6 +230,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     }
 
     var map_data = function(currlevel) {
+        this.reset = 1;
         this.level = currlevel; //consists of level.layout, and level.rooms
         this.drawRoomData = new room(0, []);
     }
@@ -243,8 +244,6 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.drawRoomData.load();
         this.drawRoomData.draw();
     }
-
-    var gamestate = new map_data(level0);
 
     //Functions to load the rooms
 
@@ -959,7 +958,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     };
 
     ratObj.prototype.move = function(){
-        ellipse(this.position.x+this.w/2, this.position.y+this.h/2, 360,360);
+        //ellipse(this.position.x+this.w/2, this.position.y+this.h/2, 360,360);
 
         this.up = true;
         this.down = true;
@@ -1240,17 +1239,25 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         }
     };
 
-    l01.enemies = [new ratObj(400, 200), new ratObj(300, 200), new ratObj(250, 300)];
-    l02.enemies = [new ratObj(400, 200), new ratObj(300, 200)];
-    l03.enemies = [new eyeballObj(400, 300)];
-    l04.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
-    l05.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
-    l06.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
-    l07.enemies = [new ratObj(500, 200), new ratObj(400, 250)];
-
     player = new playerObj(375, 275);
+
+    map_data.prototype.resetGame = function() {
+        if(this.reset === 1) {
+            l01.enemies = [new ratObj(400, 200), new ratObj(300, 200), new ratObj(250, 300)];
+            l02.enemies = [new ratObj(400, 200), new ratObj(300, 200)];
+            l03.enemies = [new eyeballObj(400, 300)];
+            l04.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
+            l05.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
+            l06.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
+            l07.enemies = [new ratObj(500, 200), new ratObj(400, 250)];
+            player = new playerObj(375, 275);
+            this.level.playerRoomLocation = new PVector(2,2);
+            this.reset = 0;
+        }
+    }
     //l00.enemies = [new eyeballObj(400,300)];
 
+    var gamestate = new map_data(level0);
 
     var drawTest = function () {
         /*
@@ -1484,6 +1491,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 drawInstructions();
                 break;
             case "game":
+                gamestate.resetGame();
                 gamestate.run();
                 player.move();
                 player.draw();
