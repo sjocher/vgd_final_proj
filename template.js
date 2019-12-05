@@ -842,6 +842,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         this.moveTime = frameCount;
         this.moveWait = 150;
+
+        this.drawn = false;
     };
 
     var eyeballObj = function(x, y){
@@ -908,12 +910,16 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     eyeballObj.prototype.draw = function(){
         if (this.hit){
             //tint(255,0,0,250);
+            noStroke();
+            fill(255,0,0,50);
             image(eyeImg, this.position.x, this.position.y, this.w, this.h);
+            ellipse(this.position.x+this.w/2, this.position.y+this.h/2, this.w, this.h);
+            noFill();
             //noTint();
 
             //image(eyeImg, this.position.x, this.position.y, this.w, this.h);
             this.hitTime++;
-            if (this.hitTime === 3){
+            if (this.hitTime === 5){
                 this.hit = 0;
                 this.hitTime = 0;
             }
@@ -972,9 +978,17 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     };
 
     ratObj.prototype.draw = function(){
+        if (!this.drawn){
+            this.drawn = true;
+            this.moveTime = frameCount;
+        }
         if (this.hit){
             //tint(255, 0,0,250);
+            noStroke();
+            fill(255,0,0,50);
             image(ratImg, this.position.x, this.position.y, this.w, this.h);
+            rect(this.position.x, this.position.y, this.w, this.h, 50);
+            noFill();
             //noTint();
             this.hitTime++;
             if (this.hitTime === 5){
@@ -999,7 +1013,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         checkCollisionWalls(this);
 
-        if (frameCount > (this.moveTime + this.moveWait)){
+        if (frameCount > (this.moveTime + this.moveWait) && this.drawn){
             this.moveTime = frameCount;
             if (dist(this.position.x+this.w/2, this.position.y+this.h/2, player.position.x+player.w/2, player.position.y+player.h/2) <= 180) {
                 //chase
@@ -1051,8 +1065,12 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         if (this.hit){
             //text("HIT!", 400, 400);
             //tint(255,0,0,250);
+            noStroke();
+            fill(255,0,0,50);
             //rect(this.position.x, this.position.y, this.w, this.h);
             image(playerImg, this.position.x, this.position.y, this.w, this.h);
+            rect(this.position.x+15, this.position.y, 20, this.h);
+            noFill();
             //noTint();
             this.hitCount++;
             if (this.hitCount === 10){
