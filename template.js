@@ -1778,7 +1778,6 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 player.draw();
                 player.shoot();
                 player.checkDoors();
-                showMinimap();
                 break;
             case "test":
                 gamestate.run();
