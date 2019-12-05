@@ -208,22 +208,22 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     }
     
     room.prototype.draw = function() {
-        background(0,0,0);
-        for(var i = 0; i < this.walls.length; ++i) {
+        background(0, 0, 0);
+        for (var i = 0; i < this.walls.length; ++i) {
             this.walls[i].draw();
         }
-        for(var i = 0; i < this.floor.length; ++i) {
+        for (var i = 0; i < this.floor.length; ++i) {
             this.floor[i].draw();
         }
-        for(var i = 0; i < this.doors.length; ++i) {
-            if(this.enemies.length > 0) {
+        for (var i = 0; i < this.doors.length; ++i) {
+            if (this.enemies.length > 0) {
                 this.doors[i].open = 0;
             } else {
                 this.doors[i].open = 1;
             }
             this.doors[i].draw();
         }
-        for(var i = 0; i < this.enemies.length; ++i){
+        for (var i = 0; i < this.enemies.length; ++i) {
             this.enemies[i].move();
             this.enemies[i].draw();
         }
@@ -536,6 +536,11 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         startButton.draw();
         instructionsButton.draw();
         creditsButton.draw();
+        if (soundBool === 1) {
+            soundButton.textOption = "Sound: ON";
+        } else if (soundBool === -1) {
+            soundButton.textOption = "Sound: OFF";
+        }
         soundButton.draw();
     };
 
@@ -618,6 +623,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var leftForce = new PVector(-1, 0);
     var upForce = new PVector(0, -1);
     var downForce = new PVector(0, 1);
+    var pausedTime = 0;
+    var pausedCurrFrame = 0;
 
 
     var checkCollisionWalls = function(obj){
@@ -667,6 +674,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.down = true;
         this.left = true;
         this.right = true;
+
+        this.pausedTime = 0;
+        this.pausedCurrFrame = 0;
     };
 
     arrowObj.prototype.checkCollision = function(){
@@ -695,7 +705,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     };
 
     arrowObj.prototype.draw = function(){
-        if (frameCount >= (this.currFrameCount+this.timeEnd)){
+        if (frameCount >= (this.currFrameCount+this.timeEnd+this.pausedTime)){
+            this.pausedTime = 0;
             return false;
         }
         else{
@@ -814,6 +825,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.arrows = [];
 
         this.damage = 1;
+
+        this.pausedTime = 0;
+        this.pausedCurrFrame = 0;
     };
 
     var ratObj = function(x, y) {
@@ -844,6 +858,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.moveWait = 150;
 
         this.drawn = false;
+
+        this.pausedTime = 0;
+        this.pausedCurrFrame = 0;
     };
 
     var eyeballObj = function(x, y){
@@ -867,6 +884,10 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         this.hit = 0;
         this.hitTime = 0;
+
+
+        this.pausedTime = 0;
+        this.pausedCurrFrame = 0;
     };
 
     var knightObj = function(x, y) {
@@ -895,6 +916,10 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         this.moveTime = frameCount;
         this.moveWait = 150;
+
+
+        this.pausedTime = 0;
+        this.pausedCurrFrame = 0;
     };
 
     knightObj.prototype.draw = function(){
@@ -1013,7 +1038,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         checkCollisionWalls(this);
 
-        if (frameCount > (this.moveTime + this.moveWait) && this.drawn){
+        if (frameCount > (this.moveTime + this.moveWait + this.pausedTime) && this.drawn){
+            this.pausedTime = 0;
             this.moveTime = frameCount;
             if (dist(this.position.x+this.w/2, this.position.y+this.h/2, player.position.x+player.w/2, player.position.y+player.h/2) <= 180) {
                 //chase
@@ -1080,7 +1106,13 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         }
         else {
-            if (frameCount > (this.hitTime + this.hitBuffer) || frameCount < this.hitBuffer) {
+            var pauseBuffer = 0;
+            if (pausedTime > 0){
+                if (frameCount - pausedTime - pausedCurrFrame < 10){
+                    pauseBuffer = 10;
+                }
+            }
+            if (frameCount > (this.hitTime + this.hitBuffer + pauseBuffer) || frameCount < this.hitBuffer) {
                 image(playerImg, this.position.x, this.position.y, this.w, this.h);
             }
             else {
@@ -1260,8 +1292,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.acceleration.set(0, 0);
 
         //check for enemies
-        if (frameCount > (this.hitTime + this.hitBuffer)) {
+        if (frameCount > (this.hitTime + this.hitBuffer + this.pausedTime)) {
             //this.hit = 0;
+            this.pausedTime = 0;
             this.checkEnemies();
         }
 
@@ -1373,6 +1406,73 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         gamestate.reset = 1;
     };
 
+    var Pmenu = function (state) {
+        this.state = state;
+    }
+
+    var pauseMenu = new Pmenu(0);
+    var resumeButton = new buttonMenuObj(400, 300, "unselected", "Resume");
+    var exitButton = new buttonMenuObj(400, 360, "unselected", "Exit");
+    var soundPButton = new buttonMenuObj(400, 420, "unselected", "Sound: ON");
+
+    var cyclePauseMenu = function (state) {
+        switch (state) {
+            case 0:
+                resumeButton.state = "selected";
+                exitButton.state = "unselected";
+                soundPButton.state = "unselected";
+                fill(255,0,0);
+                //triangle(60, 328, 60 + 30, 328 + 15, 60, 328 + 30);
+                var arrow = new selectorMenuObj(resumeButton.x - 100, resumeButton.y + 8);
+                break;
+            case 1:
+                exitButton.state = "selected";
+                resumeButton.state = "unselected";
+                soundPButton.state = "unselected";
+                //triangle(60, 388, 60 + 30, 388 + 15, 60, 388 + 30);
+                var arrow = new selectorMenuObj(exitButton.x - 100, exitButton.y + 8);
+                break;
+            case 2:
+                exitButton.state = "unselected";
+                resumeButton.state = "unselected";
+                soundPButton.state = "selected";
+                //triangle(60, 448, 60 + 30, 448 + 15, 60, 448 + 30);
+                var arrow = new selectorMenuObj(soundPButton.x - 100, soundPButton.y + 8);
+                break;
+        }
+    };
+
+    var drawPauseScreen = function(){
+        stroke(0,0,0);
+        strokeWeight(5);
+        fill(130,130,130);
+        rect(100, 100, 600, 400, 20);
+        textSize(64);
+        textAlign(CENTER);
+        fill(0,0,0);
+        text("PAUSED",400, 175);
+        image(playerImg, 125, 325, 150, 150);
+
+        textSize(32);
+        //STATS
+        text("Damage: " + player.damage,400, 225);
+
+
+        textAlign(LEFT);
+
+        strokeWeight(1);
+        cyclePauseMenu(pauseMenu.state);
+        resumeButton.draw();
+        exitButton.draw();
+        if (soundBool === 1) {
+            soundPButton.textOption = "Sound: ON";
+        } else if (soundBool === -1) {
+            soundPButton.textOption = "Sound: OFF";
+        }
+        soundPButton.draw();
+
+    };
+
 
     /* Main Draw and Key Input Area */
 
@@ -1450,6 +1550,19 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 }
                 break;
             case "game":
+                if (keyCode === 80 || keyCode === 112) { // P or p
+                    //state = "paused";
+                    pauseMenu.state = 0;
+                    player.pausedCurrFrame = frameCount;
+                    for(var i=0; i<player.arrows.length; i++){
+                        player.arrows[i].pausedCurrFrame = frameCount;
+                    }
+                    for(var i=0; i<gamestate.currRoom.enemies.length; i++){
+                        gamestate.currRoom.enemies[i].pausedCurrFrame = frameCount;
+                    }
+                    state = "paused";
+                }
+
                 if (keyCode === 68 || keyCode === 100) {//D or d
                     player.walkRight = 1;
                 }
@@ -1462,24 +1575,70 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 if (keyCode === 83 || keyCode === 115) {//S or s
                     player.walkDown = 1;
                 }
-                if (player.currFrameCount < (frameCount - player.shotSpeed)){
-                    if (keyCode === RIGHT){
+                if (player.currFrameCount < (frameCount - player.shotSpeed)) {
+                    if (keyCode === RIGHT) {
                         player.shootRight = 1;
-                    }
-                    else if (keyCode === LEFT){
+                    } else if (keyCode === LEFT) {
                         player.shootLeft = 1;
-                    }
-                    else if (keyCode === UP){
-                       player.shootUp = 1;
-                    }
-                    else if (keyCode === DOWN){
-                       player.shootDown = 1;
+                    } else if (keyCode === UP) {
+                        player.shootUp = 1;
+                    } else if (keyCode === DOWN) {
+                        player.shootDown = 1;
                     }
                 }
                 break;
             case "gameover":
                 if (keyCode === ENTER) {
                     state = "menu";
+                }
+                break;
+            case "paused":
+                console.log("state: ", pauseMenu.state);
+                if (keyCode === UP) {
+                    if (soundBool === 1) {
+                        clickSound.play();
+                    }
+                    if (pauseMenu.state === 0) {
+                        pauseMenu.state = 2;
+                    } else {
+                        pauseMenu.state--;
+                    }
+                } else if (keyCode === DOWN) {
+                    if (soundBool === 1) {
+                        clickSound.play();
+                    }
+                    if (pauseMenu.state === 2) {
+                        pauseMenu.state = 0;
+                    } else {
+                        pauseMenu.state++;
+                    }
+                }
+                if (keyCode === ENTER) {
+                    switch (pauseMenu.state) {
+                        case 0:
+                            player.pausedTime = frameCount - player.pausedCurrFrame;
+                            for(var i=0; i<player.arrows.length; i++){
+                                player.arrows[i].pausedTime = frameCount - player.arrows[i].pausedCurrFrame;
+                            }
+                            for(var i=0; i<gamestate.currRoom.enemies.length; i++){
+                                gamestate.currRoom.enemies[i].pausedTime = frameCount - gamestate.currRoom.enemies[i].pausedCurrFrame;
+                            }
+                            state = "game";
+                            break;
+                        case 1:
+                            gamestate.reset = 1;
+                            state = "menu";
+                            break;
+                        case 2:
+                            soundBool *= -1;
+                            if (soundBool === 1) {
+                                soundPButton.textOption = "Sound: ON";
+                            } else if (soundBool === -1) {
+                                soundPButton.textOption = "Sound: OFF";
+                            }
+                            break;
+                    }
+                    //menu.state = 0;
                 }
                 break;
             /*
@@ -1569,6 +1728,32 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                    player.shootDown = 0;
                 }
                 break;
+            case "paused":
+                if (keyCode === 68 || keyCode === 100) {//D or d
+                    player.walkRight = 0;
+                }
+                if (keyCode === 65 || keyCode === 97) {//A or a
+                    player.walkLeft = 0;
+                }
+                if (keyCode === 87 || keyCode === 119) {//W or w
+                    player.walkUp = 0;
+                }
+                if (keyCode === 83 || keyCode === 115) {//S or s
+                    player.walkDown = 0;
+                }
+                if (keyCode === RIGHT){
+                    player.shootRight = 0;
+                }
+                if (keyCode === LEFT){
+                    player.shootLeft = 0;
+                }
+                if (keyCode === UP){
+                   player.shootUp = 0;
+                }
+                if (keyCode === DOWN) {
+                    player.shootDown = 0;
+                }
+                break;
         }
     };
 
@@ -1601,6 +1786,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 break;
             case "gameover":
                 drawGameOver();
+                break;
+            case "paused":
+                drawPauseScreen();
                 break;
         }
         //drawSky();
