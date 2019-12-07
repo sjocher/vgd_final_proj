@@ -279,7 +279,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                     //roll for potion
                     if(randomPowerUp <= player.luck + 35){
                         console.log("GOT A POTION!");
-                        gamestate.currRoom.loot.push(potion);
+                        var newPotion = new itemObj("Health Potion", potionImg, "potion", [0,0,0]);
+                        gamestate.currRoom.loot.push(newPotion);
                     }
                 }
             }
@@ -815,70 +816,71 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         }
         else{
             //image(arrow, this.position.x, this.position.y, 20, 10);
+            if (this.player) {
+                this.up = true;
+                this.down = true;
+                this.left = true;
+                this.right = true;
+                var hit = this.checkCollision();
+                if (hit) {
+                    return false;
+                }
+                checkCollisionWalls(this);
 
-            this.up = true;
-            this.down = true;
-            this.left = true;
-            this.right = true;
-            var hit = this.checkCollision();
-            if (hit){
-                return false;
-            }
-            checkCollisionWalls(this);
-
-            var step = new PVector(0,0);
-            step.add(this.velocity);
-            step.mult(0.25);
-            this.position.add(step);
-            switch (this.direction){
-                case 0: //right
-                        if(this.right){
+                var step = new PVector(0, 0);
+                step.add(this.velocity);
+                step.mult(0.25);
+                this.position.add(step);
+                switch (this.direction) {
+                    case 0: //right
+                        if (this.right) {
                             image(arrow, this.position.x, this.position.y, this.w, this.h);
                             this.position.x += this.speed;
-                        }
-                        else{
+                        } else {
                             return false;
                         }
                         break;
-                case 1:
-                        if(this.down) {
+                    case 1:
+                        if (this.down) {
                             pushMatrix();
                             translate(this.position.x + this.w / 2, this.position.y + this.h / 2);
                             rotate(PI / 2);
                             image(arrow, -this.w / 2, -this.h / 2, this.w, this.h);
                             popMatrix();
                             this.position.y += this.speed;
-                        }
-                        else{
+                        } else {
                             return false;
                         }
                         break;
-                case 2:
-                        if(this.left) {
+                    case 2:
+                        if (this.left) {
                             pushMatrix();
                             translate(this.position.x + this.w / 2, this.position.y + this.h / 2);
                             rotate(PI);
                             image(arrow, -this.w / 2, -this.h / 2, this.w, this.h);
                             popMatrix();
                             this.position.x -= this.speed;
-                        }
-                        else{
+                        } else {
                             return false;
                         }
                         break;
-                case 3:
-                        if(this.up) {
+                    case 3:
+                        if (this.up) {
                             pushMatrix();
                             translate(this.position.x + this.w / 2, this.position.y + this.h / 2);
                             rotate(-PI / 2);
                             image(arrow, -this.w / 2, -this.h / 2, this.w, this.h);
                             popMatrix();
                             this.position.y -= this.speed;
-                        }
-                        else {
+                        } else {
                             return false;
                         }
                         break;
+                }
+            }
+            else{
+                //shot by not player
+                //rotate innit
             }
         }
         return true;
@@ -941,7 +943,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.acceleration = new PVector(0, 0);
         this.step = new PVector(0,0);
 
-        this.life = 6;
+        this.life = 4;
         this.w = 50;
         this.h = 30;
 
@@ -1013,6 +1015,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         this.frictionCoeff = -0.1;
         this.friction = new PVector(0, 0);
+        this.forceCoeff = 0.3;
 
         this.damage = 1;
 
@@ -1027,14 +1030,190 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.pausedCurrFrame = 0;
     };
 
-    knightObj.prototype.draw = function(){
-        image(knightImg, this.position.x, this.position.y, this.w, this.h);
+    var archerObj = function(x, y) {
+        this.position = new PVector(x, y);
+        this.velocity = new PVector(0, 0);
+        this.acceleration = new PVector(0, 0);
+        this.step = new PVector(0,0);
 
+        this.life = 6;
+        this.w = 50;
+        this.h = 50;
+
+        //collision
+        this.up = true;
+        this.down = true;
+        this.left = true;
+        this.right = true;
+
+        this.frictionCoeff = -0.1;
+        this.friction = new PVector(0, 0);
+        this.forceCoeff = 0.3;
+
+        this.damage = 1;
+
+        this.hit = 0;
+        this.hitTime = 0;
+
+        this.moveTime = frameCount;
+        this.moveWait = 150;
+
+        this.angle = 0;
+        this.shotSpeed = 60;
+        this.arrowDuration = 50;
+        this.currFrameCount = 0; //time of shooting
+        this.arrows = [];
+
+
+        this.pausedTime = 0;
+        this.pausedCurrFrame = 0;
+    };
+
+    archerObj.prototype.draw = function(){
+        if (this.hit){
+            //tint(255, 0,0,250);
+            noStroke();
+            fill(255,0,0,50);
+            image(archerImg, this.position.x, this.position.y, this.w, this.h);
+            rect(this.position.x, this.position.y, this.w, this.h, 20);
+            noFill();
+            //noTint();
+            this.hitTime++;
+            if (this.hitTime === 5){
+                this.hit = 0;
+                this.hitTime = 0;
+            }
+        }
+        else {
+            image(archerImg, this.position.x, this.position.y, this.w, this.h);
+        }
+    };
+
+    archerObj.prototype.shoot = function(){
+        if (this.currFrameCount < (frameCount - this.shotSpeed)) {
+
+            if (this.shootRight === 1) {
+                if (soundBool === 1) {
+                    shootSound.play();
+                }
+                this.currFrameCount = frameCount;
+                this.arrows.push(new arrowObj(this.position.x + player.w, this.position.y + this.h / 2, 0, this.arrowDuration, true, this.velocity.x, this.velocity.y));
+            }
+            if (this.shootLeft === 1) {
+                if (soundBool === 1) {
+                    shootSound.play();
+                }
+                this.currFrameCount = frameCount;
+                this.arrows.push(new arrowObj(this.position.x, this.position.y + this.h / 2, 2, this.arrowDuration, true, this.velocity.x, this.velocity.y));
+            }
+            if (this.shootUp === 1) {
+                if (soundBool === 1) {
+                    shootSound.play();
+                }
+                this.currFrameCount = frameCount;
+                this.arrows.push(new arrowObj(this.position.x + player.w / 2, this.position.y, 3, this.arrowDuration, true, this.velocity.x, this.velocity.y));
+            }
+            if (this.shootDown === 1) {
+                if (soundBool === 1) {
+                    shootSound.play();
+                }
+                this.currFrameCount = frameCount;
+                this.arrows.push(new arrowObj(this.position.x + player.w / 2, this.position.y + this.h, 1, this.arrowDuration, true, this.velocity.x, this.velocity.y));
+            }
+        }
+    };
+
+    archerObj.prototype.move = function(){
+        this.up = true;
+        this.down = true;
+        this.left = true;
+        this.right = true;
+        this.acceleration.set(0,0);
+
+        checkCollisionWalls(this);
+
+        this.step.set(player.position.x - this.position.x, player.position.y - this.position.y);
+        this.step.normalize();
+        this.angle = this.step.heading();
+        console.log("angle: ", this.angle);
+
+        if(this.position.x - (player.position.x+player.w) < 275 && player.position.x - (this.position.x+this.w) < 275 && this.position.y - (player.position.y+player.h) < 275 && player.position.y - (this.position.y+this.h) < 275){
+            //shoot
+            this.shoot();
+        }
+        else{
+            //move
+
+            this.acceleration.set(cos(this.angle), sin(this.angle));
+            console.log(this.acceleration);
+            this.acceleration.mult(this.forceCoeff);
+            //this.position.x++;
+            //apply one force
+            this.velocity.add(this.acceleration);
+            this.friction.set(this.velocity.x, this.velocity.y);
+            this.friction.mult(this.frictionCoeff);
+            this.velocity.add(this.friction);
+            if (!this.right || !this.left){
+                this.velocity.x = 0;
+            }
+            if (!this.up || !this.down){
+                this.velocity.y = 0;
+            }
+
+            this.position.add(this.velocity);
+        }
+    };
+
+    knightObj.prototype.draw = function(){
+        if (this.hit){
+            //tint(255, 0,0,250);
+            noStroke();
+            fill(255,0,0,50);
+            image(knightImg, this.position.x, this.position.y, this.w, this.h);
+            rect(this.position.x, this.position.y, this.w, this.h, 20);
+            noFill();
+            //noTint();
+            this.hitTime++;
+            if (this.hitTime === 5){
+                this.hit = 0;
+                this.hitTime = 0;
+            }
+        }
+        else {
+            image(knightImg, this.position.x, this.position.y, this.w, this.h);
+        }
     };
 
     knightObj.prototype.move = function(){
+        this.up = true;
+        this.down = true;
+        this.left = true;
+        this.right = true;
+        this.acceleration.set(0,0);
 
+        checkCollisionWalls(this);
 
+        this.step.set(player.position.x - this.position.x, player.position.y - this.position.y);
+        this.step.normalize();
+        var angle = this.step.heading();
+        console.log("angle: ", angle);
+        this.acceleration.set(cos(angle), sin(angle));
+        console.log(this.acceleration);
+        this.acceleration.mult(this.forceCoeff);
+        //this.position.x++;
+        //apply one force
+        this.velocity.add(this.acceleration);
+        this.friction.set(this.velocity.x, this.velocity.y);
+        this.friction.mult(this.frictionCoeff);
+        this.velocity.add(this.friction);
+        if (!this.right || !this.left){
+            this.velocity.x = 0;
+        }
+        if (!this.up || !this.down){
+            this.velocity.y = 0;
+        }
+
+        this.position.add(this.velocity);
     };
 
     eyeballObj.prototype.draw = function(){
@@ -1146,7 +1325,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         if (frameCount > (this.moveTime + this.moveWait + this.pausedTime) && this.drawn){
             this.pausedTime = 0;
             this.moveTime = frameCount;
-            if (dist(this.position.x+this.w/2, this.position.y+this.h/2, player.position.x+player.w/2, player.position.y+player.h/2) <= 180) {
+            if (dist(this.position.x+this.w/2, this.position.y+this.h/2, player.position.x+player.w/2, player.position.y+player.h/2) <= 240) {
                 //chase
                 this.step.set(player.position.x - this.position.x, player.position.y - this.position.y);
                 this.step.normalize();
@@ -1177,9 +1356,6 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         }
 
         this.position.add(this.velocity);
-
-
-
     };
 
     playerObj.prototype.applyForce = function (force) {
@@ -1448,7 +1624,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     map_data.prototype.resetGame = function() {
         if(this.reset === 1) {
-            l01.enemies = [new ratObj(400, 200), new ratObj(300, 200), new ratObj(250, 300)];
+            //l01.enemies = [new ratObj(400, 200), new ratObj(300, 200), new ratObj(250, 300)];
+            l01.enemies = [new knightObj(400, 200)];
             l02.enemies = [new ratObj(400, 200), new ratObj(300, 200)];
             l03.enemies = [new eyeballObj(400, 300)];
             l04.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
@@ -1571,11 +1748,13 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                     console.log("COLLECTED POTION");
                     player.life += 1;
                     this.available = false;
+                    this.splice = true;
                 }
                 else{
                     console.log("COLLECTED POTION");
                     player.life += 2;
                     this.available = false;
+                    this.splice = true;
                 }
             }
             else if (this.stat === "stairs"){
@@ -1975,6 +2154,16 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 break;
             case "paused":
                 console.log("state: ", pauseMenu.state);
+                if (keyCode === 110 || keyCode === 78){ //n or N
+                    console.log("GOD MODE ENABLED");
+                    player.damage = 10;
+                    player.shotSpeed = 15;
+                    player.maxLife = 14;
+                    player.life = 14;
+                    player.luck = 50;
+                    player.arrowDuration = 80;
+                    player.maxSpeed = 5;
+                }
                 if (keyCode === UP) {
                     if (soundBool === 1) {
                         clickSound.play();
@@ -2110,6 +2299,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 }
                 break;
             case "paused":
+
                 if (keyCode === 68 || keyCode === 100) {//D or d
                     player.walkRight = 0;
                 }
