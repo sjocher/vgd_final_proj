@@ -106,6 +106,18 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                              [9,9,7,9,9],
                              [9,9,8,9,9]];
 
+    var level1_layout =     [[9,9,9,9,9],
+                             [9,9,9,9,9],
+                             [9,9,9,0,1],
+                             [8,9,9,9,2],
+                             [7,6,5,4,3]];
+
+    var level2_layout =     [[9,9,9,9,9],
+                             [1,2,3,9,9],
+                             [0,9,4,9,8],
+                             [9,9,5,6,7],
+                             [9,9,9,9,9]];
+
     var roomData = function(doors, enemies, boss, trophy, rolled) {
         this.doors = doors;
         this.enemies = enemies;
@@ -137,14 +149,57 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var l07 = new roomData(level0_room7, [], false, false, false);
     var l08 = new roomData(level0_room8, [], false, true, false);
 
+    //door layout = up, down, left, right
+    var level1_room0 = [0, 0, 0, 1];
+    var level1_room1 = [0, 1, 1, 0];
+    var level1_room2 = [1, 1, 0, 0];
+    var level1_room3 = [1, 0, 1, 0];
+    var level1_room4 = [0, 0, 1, 1];
+    var level1_room5 = [0, 0, 1, 1];
+    var level1_room6 = [0, 0, 1, 1];
+    var level1_room7 = [1, 0, 0, 1];
+    var level1_room8 = [0, 1, 0, 0];
 
-    var level = function(layout, rooms) {
+    var l10 = new roomData(level1_room0, [], false, false, true);
+    var l11 = new roomData(level1_room1, [], false, false, false);
+    var l12 = new roomData(level1_room2, [], false, false, false);
+    var l13 = new roomData(level1_room3, [], false, false, false);
+    var l14 = new roomData(level1_room4, [], false, false, false);
+    var l15 = new roomData(level1_room5, [], false, false, false);
+    var l16 = new roomData(level1_room6, [], false, false, false);
+    var l17 = new roomData(level1_room7, [], false, true, false);
+    var l18 = new roomData(level1_room8, [], true, false, false);
+
+    //door layout = up, down, left, right
+    var level2_room0 = [1, 0, 0, 0];
+    var level2_room1 = [0, 1, 0, 1];
+    var level2_room2 = [0, 0, 1, 1];
+    var level2_room3 = [0, 1, 1, 0];
+    var level2_room4 = [1, 1, 0, 0];
+    var level2_room5 = [1, 0, 0, 1];
+    var level2_room6 = [0, 0, 1, 1];
+    var level2_room7 = [1, 0, 1, 0];
+    var level2_room8 = [0, 1, 0, 0];
+
+    var l20 = new roomData(level2_room0, [], false, false, true);
+    var l21 = new roomData(level2_room1, [], false, false, false);
+    var l22 = new roomData(level2_room2, [], false, false, false);
+    var l23 = new roomData(level2_room3, [], false, false, false);
+    var l24 = new roomData(level2_room4, [], false, false, false);
+    var l25 = new roomData(level2_room5, [], false, false, false);
+    var l26 = new roomData(level2_room6, [], false, false, false);
+    var l27 = new roomData(level2_room7, [], false, true, false);
+    var l28 = new roomData(level2_room8, [], true, false, false);
+
+    var level = function(layout, rooms, x, y) {
         this.layout = layout;
         this.rooms = rooms;
-        this.playerRoomLocation = new PVector(2, 2);
+        this.playerRoomLocation = new PVector(x, y);
     }
 
-    var level0 = new level(level0_layout, [l00, l01, l02, l03, l04, l05, l06, l07, l08]);
+    var level0 = new level(level0_layout, [l00, l01, l02, l03, l04, l05, l06, l07, l08], 2, 2);
+    var level1 = new level(level1_layout, [l10, l11, l12, l13, l14, l15, l16, l17, l18], 2, 3);
+    var level2 = new level(level2_layout, [l20, l21, l22, l23, l24, l25, l26, l27, l28], 2, 0);
 
     var room = function(loaded, door_locs) {
         this.walls = [];
@@ -1477,7 +1532,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     };
 
     playerObj.prototype.checkDoors = function() {
-        //console.log(gamestate.level.playerRoomLocation.x + " " + gamestate.level.playerRoomLocation.y)
+        console.log("X: " +  gamestate.level.playerRoomLocation.x + "Y: " +  gamestate.level.playerRoomLocation.y);
         for(var i = 0; i < gamestate.drawRoomData.doors.length; ++i) {
             var current_door = gamestate.drawRoomData.doors[i];
             var door_direction = current_door.direction;
@@ -1490,6 +1545,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                      (75, 275, door_left, "left", 1));
                      (675, 275, door_right, "right", 1));
                      */
+
                     case "up":
                         //console.log("HIT");
                         gamestate.level.playerRoomLocation.x--;
@@ -1760,6 +1816,17 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             else if (this.stat === "stairs"){
                 console.log("STAIRS");
                 //do the things with stairs
+                if(gamestate.level = level0) {
+                    gamestate.level = level1;
+                    player.position = new PVector(375, 275);
+                    this.available = false;
+                    this.splice = true;
+                } else if(gamestate.level = level1) {
+                    gamestate.level = level2;
+                    player.position = new PVector(375, 275);
+                    this.available = false;
+                    this.splice = true;
+                }
             }
             else{
                 //this.drawName();
