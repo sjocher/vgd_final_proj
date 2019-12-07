@@ -109,6 +109,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var roomData = function(doors, enemies) {
         this.doors = doors;
         this.enemies = enemies;
+        this.seen = false;
     }
 
     //door layout = up, down, left, right
@@ -1203,7 +1204,6 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                      (75, 275, door_left, "left", 1));
                      (675, 275, door_right, "right", 1));
                      */
-
                     case "up":
                         //console.log("HIT");
                         gamestate.level.playerRoomLocation.x--;
@@ -1344,22 +1344,80 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     /*  MINI MAP */
 
-    var minimap_block = function(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-    
-    minimap_block.prototype.draw = function() {
-        
+    var minimap = function() {
+        this.level = gamestate.level.layout;
     }
 
-    var minimap = function() {
-        this.data = [];
+    minimap.prototype.bfs = function() {
+        /*
+        this.roomSpot = this.level.layout[this.level.playerRoomLocation.x][this.level.playerRoomLocation.y];
+        this.currRoom = this.level.rooms[this.roomSpot];
+         */
+        if(!gamestate.currRoom.seen) {
+            gamestate.currRoom.seen = true;
+        }
+        //bfs of depth 1
+        //safeguarding against accessing array locations that dont exist
+        if(gamestate.level.playerRoomLocation.x != 0) {
+            var north = gamestate.level.layout[gamestate.level.playerRoomLocation.x-1][gamestate.level.playerRoomLocation.y];
+            if(north != 9) {
+                //console.log("NORTH: " + gamestate.level.rooms[north].seen);
+                if(!gamestate.level.rooms[north].seen) {
+                    gamestate.level.rooms[north].seen = true;
+                }
+            }
+        }
+        if(gamestate.level.playerRoomLocation.x != gamestate.level.layout.length - 1) {
+            var south = gamestate.level.layout[gamestate.level.playerRoomLocation.x+1][gamestate.level.playerRoomLocation.y];
+            if(south != 9) {
+               //console.log("SOUTH: " + gamestate.level.rooms[south].seen);
+                if(!gamestate.level.rooms[south].seen) {
+                    gamestate.level.rooms[south].seen = true;
+                }
+            }
+        }
+        if(gamestate.level.playerRoomLocation.y != gamestate.level.layout[0].length - 1) {
+            var east = gamestate.level.layout[gamestate.level.playerRoomLocation.x][gamestate.level.playerRoomLocation.y + 1];
+            if(east != 9) {
+                //console.log("EAST: " + gamestate.level.rooms[east].seen);
+                if(!gamestate.level.rooms[east].seen) {
+                    gamestate.level.rooms[east].seen = true;
+                }
+            }
+        }
+        if(gamestate.level.playerRoomLocation.y != 0) {
+            var west = gamestate.level.layout[gamestate.level.playerRoomLocation.x][gamestate.level.playerRoomLocation.y-1];
+            if(west != 9) {
+                console.log("WEST: " + gamestate.level.rooms[west].seen);
+                if(!gamestate.level.rooms[west].seen) {
+                    gamestate.level.rooms[west].seen = true;
+                }
+            }
+        }
     }
     
     minimap.prototype.show = function() {
-        
+        for(var i = 0; i < gamestate.level.layout.length; ++i) {
+            for(var j = 0; j < gamestate.level.layout[0].length; ++j) {
+                var room = gamestate.level.layout[i][j];
+                //console.log(room);
+               // console.log(room + " " + gamestate.level.rooms[room].seen)
+                if(room != 9) {
+                    if(gamestate.level.rooms[room].seen) {
+                        //console.log("HERE");
+                        noFill();
+                        rect(j*20 + 600, i*20 + 100, 20, 20);
+                        if(i == gamestate.level.playerRoomLocation.x && j == gamestate.level.playerRoomLocation.y) {
+                            fill(255, 0, 0);
+                            ellipse(j*20 + 610, i*20 +110, 5, 5);
+                        }
+                    }
+                }
+            }
+        }
     }
+
+    var mmap = new minimap();
     /*  END MINI MAP */
 
     var drawTest = function () {
@@ -1778,6 +1836,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 player.draw();
                 player.shoot();
                 player.checkDoors();
+                mmap.bfs();
+                mmap.show();
                 break;
             case "test":
                 gamestate.run();
