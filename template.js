@@ -686,7 +686,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var arrow = loadImage("./images/arrow.png");
     var door_closed = loadImage("./images/door_closed.png");
     var stairIMG = loadImage("./images/stairs.png");
-    var drawCredits = function () {
+    var skullIMG = loadImage("./images/skull.png");
+    var trophyIMG = loadImage("./images/trophy.png");
+    var drawCredits = function() {
         background(0, 0, 0);
         fill(255, 255, 255);
         textSize(32);
@@ -1692,7 +1694,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         if(gamestate.level.playerRoomLocation.y != 0) {
             var west = gamestate.level.layout[gamestate.level.playerRoomLocation.x][gamestate.level.playerRoomLocation.y-1];
             if(west != 9) {
-                console.log("WEST: " + gamestate.level.rooms[west].seen);
+                //console.log("WEST: " + gamestate.level.rooms[west].seen);
                 if(!gamestate.level.rooms[west].seen) {
                     gamestate.level.rooms[west].seen = true;
                 }
@@ -1710,10 +1712,21 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                     if(gamestate.level.rooms[room].seen) {
                         //console.log("HERE");
                         noFill();
-                        rect(j*20 + 600, i*20 + 100, 20, 20);
+                        stroke(255, 255, 255);
+                        strokeWeight(1);
+                        rect(j*20 + 675, i*20 + 35, 20, 20, 5);
+                        if(gamestate.level.rooms[room].boss) {
+                            //draw boss
+                            image(skullIMG, j*20 + 678, i*20 + 38, 15, 15);
+                        }
+                        if(gamestate.level.rooms[room].loot.length > 0) {
+                            //draw loot symbol
+                            image(trophyIMG, j*20 + 678, i*20 + 39, 15, 15);
+                        }
                         if(i == gamestate.level.playerRoomLocation.x && j == gamestate.level.playerRoomLocation.y) {
                             fill(255, 0, 0);
-                            ellipse(j*20 + 610, i*20 +110, 5, 5);
+                            noStroke();
+                            ellipse(j*20 + 685, i*20 + 46, 5, 5);
                         }
                     }
                 }
@@ -2160,7 +2173,5 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 drawPauseScreen();
                 break;
         }
-        //drawSky();
     };
-
 }};
