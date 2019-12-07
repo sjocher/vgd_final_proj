@@ -2011,7 +2011,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                             //draw boss
                             image(skullIMG, j*20 + 678, i*20 + 38, 15, 15);
                         }
-                        if(gamestate.level.rooms[room].loot.length > 0) {
+                        if(gamestate.level.rooms[room].loot.length > 0 || (gamestate.level.rooms[room].trophy && gamestate.level.rooms[room].loot.length > 0)) {
                             //draw loot symbol
                             image(trophyIMG, j*20 + 678, i*20 + 39, 15, 15);
                         }
