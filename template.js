@@ -106,9 +106,14 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                              [9,9,7,9,9],
                              [9,9,8,9,9]];
 
-    var roomData = function(doors, enemies) {
+    var roomData = function(doors, enemies, boss, trophy, rolled) {
         this.doors = doors;
         this.enemies = enemies;
+
+        this.boss = boss;
+        this.trophy = trophy;
+        this.rolled = rolled;
+        this.loot = [];
     }
 
     //door layout = up, down, left, right
@@ -122,19 +127,19 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var level0_room7 = [1, 1, 0, 0];
     var level0_room8 = [1, 0, 0, 0];
 
-    var l00 = new roomData(level0_room0, []);
-    var l01 = new roomData(level0_room1, []);
-    var l02 = new roomData(level0_room2, []);
-    var l03 = new roomData(level0_room3, []);
-    var l04 = new roomData(level0_room4, []);
-    var l05 = new roomData(level0_room5, []);
-    var l06 = new roomData(level0_room6, []);
-    var l07 = new roomData(level0_room7, []);
-    var l08 = new roomData(level0_room8, []);
+    var l00 = new roomData(level0_room0, [], false, false, true);
+    var l01 = new roomData(level0_room1, [], false, false, false);
+    var l02 = new roomData(level0_room2, [], false, false, false);
+    var l03 = new roomData(level0_room3, [], true, false, false);
+    var l04 = new roomData(level0_room4, [], false, false, false);
+    var l05 = new roomData(level0_room5, [], false, false, false);
+    var l06 = new roomData(level0_room6, [], false, false, false);
+    var l07 = new roomData(level0_room7, [], false, false, false);
+    var l08 = new roomData(level0_room8, [], false, true, false);
 
 
     var level = function(layout, rooms) {
-        this.layout = layout
+        this.layout = layout;
         this.rooms = rooms;
         this.playerRoomLocation = new PVector(2, 2);
     }
@@ -148,6 +153,11 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.doors = [];
         this.enemies = [];
         this.loaded = loaded;
+
+        this.loot = [];
+        this.rolled = false;
+        this.boss = false;
+        this.trophy = false;
     }
 
     room.prototype.load = function() {
@@ -227,7 +237,81 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             this.enemies[i].move();
             this.enemies[i].draw();
         }
+        for (var i = 0; i < gamestate.currRoom.loot.length; ++i) {
+            //this.loot[i].draw();
+            gamestate.currRoom.loot[i].draw();
+            /*
+            if (gamestate.currRoom.loot[i].available){
+                gamestate.currRoom.loot[i].draw();
+            }
+            else{
+                gamestate.currRoom.loot.splice(i, 1);
+            }
+            */
+
+            if (gamestate.currRoom.loot[i].spliceBool){
+                gamestate.currRoom.loot.splice(i, 1);
+            }
+        }
     }
+
+    room.prototype.rollLoot = function(){
+        console.log("ROLLING LOOT");
+        this.rolled = true;
+
+        if (allItems.length === 0) {
+            resetItems();
+        }
+
+        if (!this.boss) {
+            if (!this.trophy) {
+                var randomPowerUp = random(0, 100);
+                if (randomPowerUp <= player.luck) {
+                    //get item
+                    console.log("GOT AN ITEM!");
+                    if (allItems.length > 0) {
+                        var randomIndex = floor(random(0, allItems.length));
+                        gamestate.currRoom.loot.push(allItems[randomIndex]);
+                        allItems.splice(randomIndex, 1);
+                    }
+                }
+                else {
+                    //player did not get power up
+                    //roll for potion
+                    if(randomPowerUp <= player.luck + 35){
+                        console.log("GOT A POTION!");
+                        gamestate.currRoom.loot.push(potion);
+                    }
+                }
+            }
+            else {
+                //trophy room
+                console.log("TROPHY ROOM");
+                console.log("LENGTH: ", allItems.length);
+                if (allItems.length > 0) {
+                    var randomIndex = floor(random(0, allItems.length));
+                    console.log("INDEX: ", randomIndex);
+                    gamestate.currRoom.loot.push(allItems[randomIndex]);
+                    allItems.splice(randomIndex, 1);
+                }
+            }
+        }
+        else{
+            //boss room load item and stairs.
+            //load item
+            console.log("BOSS ROOM");
+            console.log("LENGTH: ", allItems.length);
+            if (allItems.length > 0) {
+                console.log("INDEX: ", randomIndex);
+                var randomIndex = floor(random(0, allItems.length));
+                gamestate.currRoom.loot.push(allItems[randomIndex]);
+                allItems.splice(randomIndex, 1);
+            }
+
+            //load stairs
+            gamestate.currRoom.loot.push(stairs);
+        }
+    };
 
     var map_data = function(currlevel) {
         this.reset = 1;
@@ -241,8 +325,22 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.currRoom = this.level.rooms[this.roomSpot];
         this.drawRoomData.door_locs = this.currRoom.doors;
         this.drawRoomData.enemies = this.currRoom.enemies;
+        this.drawRoomData.boss = this.currRoom.boss;
+        this.drawRoomData.trophy = this.currRoom.trophy;
+        this.drawRoomData.rolled = this.currRoom.rolled;
+        this.drawRoomData.loot = this.currRoom.loot;
         this.drawRoomData.load();
         this.drawRoomData.draw();
+        if (!this.drawRoomData.rolled && this.drawRoomData.enemies.length === 0){
+            this.drawRoomData.rollLoot();
+            this.currRoom.rolled = true;
+            /*
+            if (this.drawnRoomData.boss){
+
+            }
+
+            */
+        }
     }
 
     //Functions to load the rooms
@@ -269,6 +367,11 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     };
     var rainSound = new sound("./sounds/rain.wav");
     var clickSound = new sound("./sounds/click.wav");
+    var shootSound = new sound("./sounds/shoot.wav");
+
+    var hitSound = new sound("./sounds/grunt.wav");
+    var deathSound = new sound("./sounds/death.wav");
+    var fanfareSound = new sound("./sounds/fanfare.wav");
 
     /* OPENING SCREEN AREA */
 
@@ -566,7 +669,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var playerImg = loadImage("./images/player.png");
     var potionImg = loadImage("./images/potion.png");
     var ratImg = loadImage("./images/rat.png");
-    var fullheartImg = loadImage("./images/fullheart.png");
+    //var fullheartImg = loadImage("./images/fullheart.png");
     var floor_block = loadImage("./images/floor_block.png");
     var wall_left = loadImage("./images/wall_left.png");
     var wall_top = loadImage("./images/wall_top.png");
@@ -819,12 +922,13 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.shootLeft = 0;
         this.shootUp = 0;
         this.shootDown = 0;
-        this.shotSpeed = 20;
+        this.shotSpeed = 30;
         this.arrowDuration = 60;
         this.currFrameCount = 0; //time of shooting
         this.arrows = [];
 
         this.damage = 1;
+        this.luck = 10;
 
         this.pausedTime = 0;
         this.pausedCurrFrame = 0;
@@ -1177,11 +1281,17 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     playerObj.prototype.checkEnemies = function(){
         for (var i=0; i<gamestate.drawRoomData.enemies.length; i++){
             if (this.position.x + 12 < gamestate.drawRoomData.enemies[i].position.x + gamestate.drawRoomData.enemies[i].w && this.position.x + this.w - 8 > gamestate.drawRoomData.enemies[i].position.x && this.position.y < gamestate.drawRoomData.enemies[i].position.y + gamestate.drawRoomData.enemies[i].h && this.position.y + this.h > gamestate.drawRoomData.enemies[i].position.y) {
+                if (soundBool === 1) {
+                    hitSound.play();
+                }
                 this.life -= gamestate.drawRoomData.enemies[i].damage;
                 this.hit = 1;
                 this.hitTime = frameCount;
                 if (this.life <= 0){
                     //GAMEOVER
+                    if (soundBool === 1) {
+                        deathSound.play();
+                    }
                     state = "gameover";
                 }
 
@@ -1304,18 +1414,30 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     playerObj.prototype.shoot = function(){
         if (this.currFrameCount < (frameCount - this.shotSpeed)) {
             if (this.shootRight === 1) {
+                if (soundBool === 1) {
+                    shootSound.play();
+                }
                 this.currFrameCount = frameCount;
                 this.arrows.push(new arrowObj(this.position.x + player.w, this.position.y + this.h / 2, 0, this.arrowDuration, true, this.velocity.x, this.velocity.y));
             }
             if (this.shootLeft === 1) {
+                if (soundBool === 1) {
+                    shootSound.play();
+                }
                 this.currFrameCount = frameCount;
                 this.arrows.push(new arrowObj(this.position.x, this.position.y + this.h / 2, 2, this.arrowDuration, true, this.velocity.x, this.velocity.y));
             }
             if (this.shootUp === 1) {
+                if (soundBool === 1) {
+                    shootSound.play();
+                }
                 this.currFrameCount = frameCount;
                 this.arrows.push(new arrowObj(this.position.x + player.w / 2, this.position.y, 3, this.arrowDuration, true, this.velocity.x, this.velocity.y));
             }
             if (this.shootDown === 1) {
+                if (soundBool === 1) {
+                    shootSound.play();
+                }
                 this.currFrameCount = frameCount;
                 this.arrows.push(new arrowObj(this.position.x + player.w / 2, this.position.y + this.h, 1, this.arrowDuration, true, this.velocity.x, this.velocity.y));
             }
@@ -1332,7 +1454,26 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             l04.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
             l05.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
             l06.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
-            l07.enemies = [new ratObj(500, 200), new ratObj(400, 250)];
+            l07.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
+            l01.rolled = false;
+            l02.rolled = false;
+            l03.rolled = false;
+            l04.rolled = false;
+            l05.rolled = false;
+            l06.rolled = false;
+            l07.rolled = false;
+            l08.rolled = false;
+            l01.loot = [];
+            l02.loot = [];
+            l03.loot = [];
+            l04.loot = [];
+            l05.loot = [];
+            l06.loot = [];
+            l07.loot = [];
+            l08.loot = [];
+
+
+            resetItems();
             player = new playerObj(375, 275);
             this.level.playerRoomLocation = new PVector(2,2);
             this.reset = 0;
@@ -1341,6 +1482,171 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     //l00.enemies = [new eyeballObj(400,300)];
 
     var gamestate = new map_data(level0);
+
+    /*  LOOT SYSTEM AND ITEMS  */
+
+    var itemObj = function(name, img, stat, color){
+        this.name = name;
+        this.img = img;
+        this.stat = stat;
+        this.color = color;
+
+        if(stat === "stairs"){
+            this.x = 625;
+            this.y = 425;
+            this.w = 50;
+            this.h = 50;
+        }
+        else {
+            this.x = 375;
+            this.y = 275;
+            this.w = 50;
+            this.h = 50;
+        }
+
+        this.available = true;
+        this.currFrameCount = 0;
+
+        this.spliceBool = false;
+        this.showNameTime = 120;
+    };
+
+    var allItems = [];
+    var health = new itemObj("Health", 0, "health", [255,0,0]);
+    var damage = new itemObj("Damage", 0, "damage", [102,0,204]);
+    var speed = new itemObj("Speed", 0, "speed", [255,255,255]);
+    var shotSpeed = new itemObj("Shot Speed", 0, "shotSpeed", [255,255,0]);
+    var shotLength = new itemObj("Shot Length", 0, "shotLength", [0,128,255]);
+    var luck = new itemObj("Luck", 0, "luck", [0,153,0]);
+
+    var potion = new itemObj("Health Potion", potionImg, "potion", [0,0,0]);
+    var stairs = new itemObj("Stairs", stairIMG, "stairs", [0,0,0]);
+
+    var resetItems = function(){
+        allItems = [health, damage, speed, shotSpeed, shotLength, luck];
+    };
+
+    itemObj.prototype.drawName = function(){
+        fill(130, 130, 130);
+        strokeWeight(1);
+        rect(200, 100, 400, 100, 50);
+
+        textAlign(CENTER);
+        textSize(50);
+        fill(0,0,0);
+        text(this.name, 400, 145);
+
+        textSize(36);
+        switch (this.stat) {
+            case "health":
+                text("+ Max Health +", 400, 190);
+                break;
+            case "damage":
+                text("+ Damage +", 400, 190);
+                break;
+            case "speed":
+                text("+ Speed +", 400, 190);
+                break;
+            case "shotSpeed":
+                text("+ Shot Speed +", 400, 190);
+                break;
+            case "shotLength":
+                text("+ Shot Length +", 400, 190);
+                break;
+            case "luck":
+                text("+ Luck +", 400, 190);
+                break;
+        }
+        textAlign(LEFT);
+    };
+
+    itemObj.prototype.checkCollected = function(){
+        if (player.position.x + 12 < this.x + this.w && player.position.x + player.w - 8 > this.x && player.position.y < this.y + this.h && player.position.y + player.h > this.y) {
+            if(this.stat === "potion"){
+                if(player.life === player.maxLife){
+                    //do nothing
+                    //might need to do something if loading displaying weird
+                }
+                else if (player.life === player.maxLife - 1){
+                    console.log("COLLECTED POTION");
+                    player.life += 1;
+                    this.available = false;
+                }
+                else{
+                    console.log("COLLECTED POTION");
+                    player.life += 2;
+                    this.available = false;
+                }
+            }
+            else if (this.stat === "stairs"){
+                console.log("STAIRS");
+                //do the things with stairs
+            }
+            else{
+                //this.drawName();
+                this.currFrameCount = frameCount;
+                console.log("COLLECTED LOOT");
+                if (soundBool === 1) {
+                    fanfareSound.play();
+                }
+
+                switch (this.stat) {
+                    case "health":
+                        player.maxLife += 2;
+                        player.life += 2;
+                        break;
+                    case "damage":
+                        player.damage++;
+                        break;
+                    case "speed":
+                        player.maxSpeed++;
+                        break;
+                    case "shotSpeed":
+                        player.shotSpeed -= 5;
+                        break;
+                    case "shotLength":
+                        player.arrowDuration += 20;
+                        break;
+                    case "luck":
+                        player.luck += 10;
+                        break;
+                }
+                this.available = false;
+                textAlign(LEFT);
+            }
+        }
+    };
+
+    itemObj.prototype.draw = function(){
+        if (this.available){
+            //console.log("DRAWING ITEM ", this.name);
+            //image(img, this.x, this.y, this.w, this.h);
+            stroke(0,0,0);
+            strokeWeight(1);
+            if (this.stat !== "potion" && this.stat !== "stairs") {
+                console.log("DRAWING ITEM ", this.name);
+                fill(this.color[0], this.color[1], this.color[2]);
+                rect(this.x, this.y, this.w, this.h);
+            }
+            else{
+                image(this.img, this.x, this.y, this.w, this.h);
+            }
+
+            this.checkCollected();
+        }
+        if (this.stat !== "potion" && this.stat !== "stairs"){
+            if (frameCount < this.currFrameCount + this.showNameTime && frameCount > 60){
+                //draw name and stuff
+                this.drawName();
+            }
+            if (frameCount === this.currFrameCount + this.showNameTime && frameCount > 60){
+                //draw name and stuff
+                this.spliceBool = true;
+            }
+        }
+    };
+
+
 
     /*  MINI MAP */
 
@@ -1453,9 +1759,15 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         text("PAUSED",400, 175);
         image(playerImg, 125, 325, 150, 150);
 
-        textSize(32);
+        textSize(24);
         //STATS
-        text("Damage: " + player.damage,400, 225);
+        text("Damage: " + player.damage,250, 215);
+        text("Speed: " + player.maxSpeed,250, 245);
+        text("Shot Speed: " + 1/(player.shotSpeed/60),250, 275);
+
+        text("Max Health: " + player.maxLife,550, 215);
+        text("Shot Length: " + player.arrowDuration,550, 245);
+        text("Luck: " + player.luck + "%",550, 275);
 
 
         textAlign(LEFT);
