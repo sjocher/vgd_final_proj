@@ -814,7 +814,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     };
 
 
-    var arrowObj = function(x, y, direction, time, player, vx, vy) {
+    var arrowObj = function(x, y, direction, time, player, vx, vy, damage) {
         this.position = new PVector(x,y);
         this.velocity = new PVector(vx, vy);
         //0 - right
@@ -835,6 +835,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.left = true;
         this.right = true;
 
+        this.damage = damage;
         this.pausedTime = 0;
         this.pausedCurrFrame = 0;
     };
@@ -847,7 +848,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 if (this.position.x <= gamestate.drawRoomData.enemies[i].position.x + gamestate.drawRoomData.enemies[i].w && this.position.x + this.w >= gamestate.drawRoomData.enemies[i].position.x && this.position.y <= gamestate.drawRoomData.enemies[i].position.y + gamestate.drawRoomData.enemies[i].h && this.position.y + this.h >= gamestate.drawRoomData.enemies[i].position.y) {
                     // collision detected!
                     result = true;
-                    gamestate.drawRoomData.enemies[i].life -= player.damage;
+                    gamestate.drawRoomData.enemies[i].life -= this.damage;
                     gamestate.drawRoomData.enemies[i].hit = 1;
                     if (gamestate.drawRoomData.enemies[i].life <= 0){
                         gamestate.drawRoomData.enemies.splice(i,1);
@@ -859,6 +860,27 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             //shot by enemy at player
             //if enemy shoots
             //check for hit otherwise dont
+            if(!player.invincible) {
+                if (this.position.x <= player.position.x + player.w - 8 && this.position.x + this.w >= player.position.x + 12 && this.position.y <= player.position.y + player.h && this.position.y + this.h >= player.position.y) {
+                    // collision detected!
+                    console.log("ARROW HIT US");
+                    if (soundBool === 1) {
+                        hitSound.play();
+                    }
+                    result = true;
+                    player.life -= this.damage;
+                    player.hit = 1;
+                    player.hitTime = frameCount;
+                    player.invincible = true;
+                    if (player.life <= 0) {
+                        //GAMEOVER
+                        if (soundBool === 1) {
+                            deathSound.play();
+                        }
+                        state = "gameover";
+                    }
+                }
+            }
         }
 
         return result;
@@ -936,6 +958,37 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             else{
                 //shot by not player
                 //rotate innit
+                this.up = true;
+                this.down = true;
+                this.left = true;
+                this.right = true;
+
+
+                var hit = this.checkCollision();
+                if (hit) {
+                    return false;
+                }
+                checkCollisionWalls(this);
+
+                if(!this.up || !this.down || !this.right || !this.left){
+                    return false;
+                }
+                var step = new PVector(0, 0);
+                step.add(this.velocity);
+                step.mult(0.25);
+                this.position.add(step);
+
+
+                pushMatrix();
+                translate(this.position.x + this.w / 2, this.position.y + this.h / 2);
+                rotate(this.direction);
+                image(arrow, -this.w / 2, -this.h / 2, this.w, this.h);
+
+                popMatrix();
+
+                this.position.x += this.speed*cos(this.direction);
+                this.position.y += this.speed*sin(this.direction);
+
             }
         }
         return true;
@@ -990,6 +1043,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         this.pausedTime = 0;
         this.pausedCurrFrame = 0;
+
+        this.invincible = false;
     };
 
     var ratObj = function(x, y) {
@@ -1115,7 +1170,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         this.angle = 0;
         this.shotSpeed = 60;
-        this.arrowDuration = 50;
+        this.arrowDuration = 70;
         this.currFrameCount = 0; //time of shooting
         this.arrows = [];
 
@@ -1142,39 +1197,22 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         else {
             image(archerImg, this.position.x, this.position.y, this.w, this.h);
         }
+
+        for (var i=0; i<this.arrows.length; i++){
+            var alive = this.arrows[i].draw();
+            if (!alive){
+                this.arrows.splice(i,1);
+            }
+        }
     };
 
     archerObj.prototype.shoot = function(){
         if (this.currFrameCount < (frameCount - this.shotSpeed)) {
-
-            if (this.shootRight === 1) {
-                if (soundBool === 1) {
-                    shootSound.play();
-                }
-                this.currFrameCount = frameCount;
-                this.arrows.push(new arrowObj(this.position.x + player.w, this.position.y + this.h / 2, 0, this.arrowDuration, true, this.velocity.x, this.velocity.y));
+            if (soundBool === 1) {
+                shootSound.play();
             }
-            if (this.shootLeft === 1) {
-                if (soundBool === 1) {
-                    shootSound.play();
-                }
-                this.currFrameCount = frameCount;
-                this.arrows.push(new arrowObj(this.position.x, this.position.y + this.h / 2, 2, this.arrowDuration, true, this.velocity.x, this.velocity.y));
-            }
-            if (this.shootUp === 1) {
-                if (soundBool === 1) {
-                    shootSound.play();
-                }
-                this.currFrameCount = frameCount;
-                this.arrows.push(new arrowObj(this.position.x + player.w / 2, this.position.y, 3, this.arrowDuration, true, this.velocity.x, this.velocity.y));
-            }
-            if (this.shootDown === 1) {
-                if (soundBool === 1) {
-                    shootSound.play();
-                }
-                this.currFrameCount = frameCount;
-                this.arrows.push(new arrowObj(this.position.x + player.w / 2, this.position.y + this.h, 1, this.arrowDuration, true, this.velocity.x, this.velocity.y));
-            }
+            this.currFrameCount = frameCount;
+            this.arrows.push(new arrowObj(this.position.x + this.w/2, this.position.y + this.h/2, this.angle, this.arrowDuration, false, this.velocity.x, this.velocity.y, this.damage));
         }
     };
 
@@ -1190,17 +1228,18 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.step.set(player.position.x - this.position.x, player.position.y - this.position.y);
         this.step.normalize();
         this.angle = this.step.heading();
-        console.log("angle: ", this.angle);
+        //console.log("angle: ", this.angle);
 
-        if(this.position.x - (player.position.x+player.w) < 275 && player.position.x - (this.position.x+this.w) < 275 && this.position.y - (player.position.y+player.h) < 275 && player.position.y - (this.position.y+this.h) < 275){
+        if(this.position.x - (player.position.x+player.w) < 250 && player.position.x - (this.position.x+this.w) < 250 && this.position.y - (player.position.y+player.h) < 250 && player.position.y - (this.position.y+this.h) < 250){
             //shoot
+            //console.log("angle: ", this.angle);
             this.shoot();
         }
         else{
             //move
 
             this.acceleration.set(cos(this.angle), sin(this.angle));
-            console.log(this.acceleration);
+            //console.log(this.acceleration);
             this.acceleration.mult(this.forceCoeff);
             //this.position.x++;
             //apply one force
@@ -1251,9 +1290,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.step.set(player.position.x - this.position.x, player.position.y - this.position.y);
         this.step.normalize();
         var angle = this.step.heading();
-        console.log("angle: ", angle);
+        //console.log("angle: ", angle);
         this.acceleration.set(cos(angle), sin(angle));
-        console.log(this.acceleration);
+        //console.log(this.acceleration);
         this.acceleration.mult(this.forceCoeff);
         //this.position.x++;
         //apply one force
@@ -1449,6 +1488,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 }
             }
             if (frameCount > (this.hitTime + this.hitBuffer + pauseBuffer) || frameCount < this.hitBuffer) {
+                this.invincible = false;
                 image(playerImg, this.position.x, this.position.y, this.w, this.h);
             }
             else {
@@ -1650,28 +1690,28 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                     shootSound.play();
                 }
                 this.currFrameCount = frameCount;
-                this.arrows.push(new arrowObj(this.position.x + player.w, this.position.y + this.h / 2, 0, this.arrowDuration, true, this.velocity.x, this.velocity.y));
+                this.arrows.push(new arrowObj(this.position.x + this.w, this.position.y + this.h / 2, 0, this.arrowDuration, true, this.velocity.x, this.velocity.y, this.damage));
             }
             if (this.shootLeft === 1) {
                 if (soundBool === 1) {
                     shootSound.play();
                 }
                 this.currFrameCount = frameCount;
-                this.arrows.push(new arrowObj(this.position.x, this.position.y + this.h / 2, 2, this.arrowDuration, true, this.velocity.x, this.velocity.y));
+                this.arrows.push(new arrowObj(this.position.x, this.position.y + this.h / 2, 2, this.arrowDuration, true, this.velocity.x, this.velocity.y, this.damage));
             }
             if (this.shootUp === 1) {
                 if (soundBool === 1) {
                     shootSound.play();
                 }
                 this.currFrameCount = frameCount;
-                this.arrows.push(new arrowObj(this.position.x + player.w / 2, this.position.y, 3, this.arrowDuration, true, this.velocity.x, this.velocity.y));
+                this.arrows.push(new arrowObj(this.position.x + this.w / 2, this.position.y, 3, this.arrowDuration, true, this.velocity.x, this.velocity.y, this.damage));
             }
             if (this.shootDown === 1) {
                 if (soundBool === 1) {
                     shootSound.play();
                 }
                 this.currFrameCount = frameCount;
-                this.arrows.push(new arrowObj(this.position.x + player.w / 2, this.position.y + this.h, 1, this.arrowDuration, true, this.velocity.x, this.velocity.y));
+                this.arrows.push(new arrowObj(this.position.x + this.w / 2, this.position.y + this.h, 1, this.arrowDuration, true, this.velocity.x, this.velocity.y, this.damage));
             }
         }
     };
@@ -1684,7 +1724,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             l01.enemies = [new knightObj(400, 200)];
             l02.enemies = [new ratObj(400, 200), new ratObj(300, 200)];
             l03.enemies = [new eyeballObj(400, 300)];
-            l04.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
+            l04.enemies = [new archerObj(500, 200)];
             l05.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
             l06.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
             l07.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
@@ -1762,6 +1802,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     itemObj.prototype.drawName = function(){
         fill(130, 130, 130);
         strokeWeight(1);
+        stroke(0,0,0);
         rect(200, 100, 400, 100, 50);
 
         textAlign(CENTER);
@@ -1880,13 +1921,18 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
             this.checkCollected();
         }
-        if (this.stat !== "potion" && this.stat !== "stairs"){
-            if (frameCount < this.currFrameCount + this.showNameTime && frameCount > 60){
-                //draw name and stuff
-                this.drawName();
+        else {
+            if (this.stat !== "potion" && this.stat !== "stairs") {
+                if (frameCount < this.currFrameCount + this.showNameTime && frameCount > 60) {
+                    //draw name and stuff
+                    this.drawName();
+                }
+                if (frameCount >= this.currFrameCount + this.showNameTime && frameCount > 60) {
+                    //draw name and stuff
+                    this.spliceBool = true;
+                }
             }
-            if (frameCount === this.currFrameCount + this.showNameTime && frameCount > 60){
-                //draw name and stuff
+            else if (this.stat === "potion") {
                 this.spliceBool = true;
             }
         }
