@@ -744,6 +744,22 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var stairIMG = loadImage("./images/stairs.png");
     var skullIMG = loadImage("./images/skull.png");
     var trophyIMG = loadImage("./images/trophy.png");
+    var acid_hurt = loadImage("./images/acid_hurt.png");
+    var archer_hurt = loadImage("./images/archer_hurt.png");
+    var health2 = loadImage("./images/health2.png");
+    var heatlh1 = loadImage("./images/health1.png");
+    var knight_hurt = loadImage("./images/knight_hurt.png");
+    var distance2 = loadImage("./images/distance2.png");
+    var rat_hurt = loadImage("./images/rat_hurt.png");
+    var distance1 = loadImage("./images/distance1.png");
+    var damage2 = loadImage("./images/distance2.png");
+    var speed2 = loadImage("./images/speed2.png");
+    var speed1 = loadImage("./images/speed1.png");
+    var shotspeed1 = loadImage("./images/shotspeed1.png");
+    var shotspeed2 = loadImage("./images/shot_speed2.png");
+    var luck2 = loadImage("./images/luck2.png");
+    var luck1 = loadImage("./images/luck1.png");
+    var player_hurt = loadImage("./images/player_hurt.png");
     var drawCredits = function() {
         background(0, 0, 0);
         fill(255, 255, 255);
@@ -1998,8 +2014,6 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         for(var i = 0; i < gamestate.level.layout.length; ++i) {
             for(var j = 0; j < gamestate.level.layout[0].length; ++j) {
                 var room = gamestate.level.layout[i][j];
-                //console.log(room);
-               // console.log(room + " " + gamestate.level.rooms[room].seen)
                 if(room != 9) {
                     if(gamestate.level.rooms[room].seen) {
                         //console.log("HERE");
