@@ -1946,21 +1946,34 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             l16.loot = [];
             l17.loot = [];
             l18.loot = [];
+
             resetItems();
 
-            for(var i = 0; i < this.level.layout.length; ++i) {
-                for(var j = 0; j < this.level.layout[0].length; ++j) {
-                    var room = this.level.layout[i][j];
+            for(var i = 0; i < level0.layout.length; ++i) {
+                for(var j = 0; j < level0.layout[0].length; ++j) {
+                    var room = level0.layout[i][j];
                     if (room != 9) {
-                        if (this.level.rooms[room].seen) {
-                            this.level.rooms[room].seen = false;
+                        if (level0.rooms[room].seen) {
+                            level0.rooms[room].seen = false;
+                        }
+                    }
+                }
+            }
+
+            for(var i = 0; i < level1.layout.length; ++i) {
+                for(var j = 0; j < level1.layout[0].length; ++j) {
+                    var room = level1.layout[i][j];
+                    if (room != 9) {
+                        if (level1.rooms[room].seen) {
+                            level1.rooms[room].seen = false;
                         }
                     }
                 }
             }
 
             player = new playerObj(375, 275);
-            this.level.playerRoomLocation = new PVector(2,2);
+            level0.playerRoomLocation = new PVector(2, 2);
+            level1.playerRoomLocation = new PVector(2, 3);
             this.reset = 0;
         }
     }
