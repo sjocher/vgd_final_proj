@@ -1970,12 +1970,12 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             else if (this.stat === "stairs"){
                 console.log("STAIRS");
                 //do the things with stairs
-                if(gamestate.level = level0) {
+                if(gamestate.level === level0) {
                     gamestate.level = level1;
                     player.position = new PVector(375, 275);
                     this.available = false;
                     this.splice = true;
-                } else if(gamestate.level = level1) {
+                } else if(gamestate.level === level1) {
                     gamestate.level = level2;
                     player.position = new PVector(375, 275);
                     this.available = false;
