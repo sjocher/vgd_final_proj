@@ -334,7 +334,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                     //roll for potion
                     if(randomPowerUp <= player.luck + 35){
                         console.log("GOT A POTION!");
-                        var newPotion = new itemObj("Health Potion", potionImg, "potion", [0,0,0]);
+                        var newPotion = new itemObj("Health Potion", potionImg, "potion");
                         gamestate.currRoom.loot.push(newPotion);
                     }
                 }
@@ -364,6 +364,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             }
 
             //load stairs
+            var stairs = new itemObj("Stairs", stairIMG, "stairs");
             gamestate.currRoom.loot.push(stairs);
         }
     };
@@ -747,12 +748,13 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     var acid_hurt = loadImage("./images/acid_hurt.png");
     var archer_hurt = loadImage("./images/archer_hurt.png");
     var health2 = loadImage("./images/health2.png");
-    var heatlh1 = loadImage("./images/health1.png");
+    var health1 = loadImage("./images/health1.png");
     var knight_hurt = loadImage("./images/knight_hurt.png");
     var distance2 = loadImage("./images/distance2.png");
     var rat_hurt = loadImage("./images/rat_hurt.png");
     var distance1 = loadImage("./images/distance1.png");
-    var damage2 = loadImage("./images/distance2.png");
+    var damage2 = loadImage("./images/damage2.png");
+    var damage1 = loadImage("./images/damage1.png");
     var speed2 = loadImage("./images/speed2.png");
     var speed1 = loadImage("./images/speed1.png");
     var shotspeed1 = loadImage("./images/shotspeed1.png");
@@ -1094,6 +1096,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         this.pausedTime = 0;
         this.pausedCurrFrame = 0;
+
+        this.arrowBool = false;
     };
 
     var eyeballObj = function(x, y){
@@ -1121,6 +1125,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         this.pausedTime = 0;
         this.pausedCurrFrame = 0;
+
+        this.arrowBool = false;
     };
 
     var knightObj = function(x, y) {
@@ -1129,7 +1135,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         this.acceleration = new PVector(0, 0);
         this.step = new PVector(0,0);
 
-        this.life = 6;
+        this.life = 8;
         this.w = 50;
         this.h = 50;
 
@@ -1154,6 +1160,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         this.pausedTime = 0;
         this.pausedCurrFrame = 0;
+
+        this.arrowBool = false;
     };
 
     var archerObj = function(x, y) {
@@ -1193,17 +1201,180 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
         this.pausedTime = 0;
         this.pausedCurrFrame = 0;
+
+        this.arrowBool = true;
+
+        this.drawn = false;
+    };
+
+    var acidObj = function(x, y) {
+        this.position = new PVector(x, y);
+        this.velocity = new PVector(0, 0);
+        this.acceleration = new PVector(0, 0);
+        this.step = new PVector(0,0);
+
+        this.w = 100;
+        this.h = 100;
+        this.speed = 1;
+        this.life = 50;
+        this.maxLife = 50;
+        this.angle = PI/4;
+
+
+        //collision
+        this.up = true;
+        this.down = true;
+        this.left = true;
+        this.right = true;
+
+        this.frictionCoeff = -0.1;
+        this.friction = new PVector(0, 0);
+        this.forceCoeff = 0.3;
+
+        this.xdir = 1;
+        this.ydir = 1;
+        this.damage = 1;
+
+        this.hit = 0;
+        this.hitTime = 0;
+
+        this.moveTime = frameCount;
+        this.moveWait = 150;
+
+        this.angle = 0;
+        this.shotSpeed = 60;
+        this.arrowDuration = 100;
+        this.currFrameCount = 0; //time of shooting
+        this.arrows = [];
+
+
+        this.pausedTime = 0;
+        this.pausedCurrFrame = 0;
+
+        this.arrowBool = true;
+
+        this.drawn = false;
+    };
+
+    acidObj.prototype.draw = function(){
+        if (this.currFrameCount === 0){
+            this.drawn = true;
+            this.currFrameCount = frameCount;
+        }
+        stroke(0,0,0);
+        strokeWeight(1);
+        fill(0,0,0,150);
+        ellipse(this.position.x +this.w/2, this.position.y+this.h*9/10, 90, this.h/2-10);
+        noFill();
+        if (this.hit){
+            image(acid_hurt, this.position.x, this.position.y, this.w, this.h);
+
+            //image(eyeImg, this.position.x, this.position.y, this.w, this.h);
+            this.hitTime++;
+            if (this.hitTime === 5){
+                this.hit = 0;
+                this.hitTime = 0;
+            }
+        }
+        else {
+            image(acidImg, this.position.x, this.position.y, this.w, this.h);
+        }
+
+        for (var i=0; i<this.arrows.length; i++){
+            var alive = this.arrows[i].draw();
+            if (!alive){
+                this.arrows.splice(i,1);
+            }
+        }
+
+        noStroke();
+        fill(255,0,0);
+        for (var i=0;i<this.life; i++){
+            rect(300+i*4, 530, 4, 40);
+        }
+        fill(0,0,0);
+        rect(400, 530, 1, 40);
+        stroke(0,0,0);
+        strokeWeight(5);
+        noFill();
+        rect(300, 530, 200, 40, 5);
+        noStroke();
+    };
+
+    acidObj.prototype.move = function(){
+        if (this.life <= this.maxLife && this.life > this.maxLife/2){
+            //first phase
+            if (this.currFrameCount < (frameCount - this.shotSpeed - this.pausedTime) && this.drawn) {
+                this.pausedTime = 0;
+                /*
+                if (soundBool === 1) {
+                    shootSound.play();
+                }
+                */
+                this.currFrameCount = frameCount;
+                this.arrows.push(new arrowObj(this.position.x + this.w, this.position.y + this.h/2, 0, this.arrowDuration, false, this.velocity.x, this.velocity.y, this.damage));
+                this.arrows.push(new arrowObj(this.position.x + this.w/2, this.position.y + this.h, PI/2, this.arrowDuration, false, this.velocity.x, this.velocity.y, this.damage));
+                this.arrows.push(new arrowObj(this.position.x, this.position.y + this.h/2, PI, this.arrowDuration, false, this.velocity.x, this.velocity.y, this.damage));
+                this.arrows.push(new arrowObj(this.position.x + this.w/2, this.position.y, PI*3/2, this.arrowDuration, false, this.velocity.x, this.velocity.y, this.damage));
+            }
+        }
+        else{
+            //second phase
+            this.speed = 1.5;
+            this.shotSpeed = 30;
+            if (this.currFrameCount < (frameCount - this.shotSpeed - this.pausedTime) && this.drawn) {
+                this.pausedTime = 0;
+                /*
+                if (soundBool === 1) {
+                    shootSound.play();
+                }
+                */
+                this.currFrameCount = frameCount;
+                this.arrows.push(new arrowObj(this.position.x + this.w, this.position.y + this.h/2, 0, this.arrowDuration, false, this.velocity.x, this.velocity.y, this.damage));
+                this.arrows.push(new arrowObj(this.position.x + this.w/2, this.position.y + this.h, PI/2, this.arrowDuration, false, this.velocity.x, this.velocity.y, this.damage));
+                this.arrows.push(new arrowObj(this.position.x, this.position.y + this.h/2, PI, this.arrowDuration, false, this.velocity.x, this.velocity.y, this.damage));
+                this.arrows.push(new arrowObj(this.position.x + this.w/2, this.position.y, PI*3/2, this.arrowDuration, false, this.velocity.x, this.velocity.y, this.damage));
+
+
+                this.arrows.push(new arrowObj(this.position.x + this.w, this.position.y + this.h, PI/4, this.arrowDuration, false, this.velocity.x, this.velocity.y, this.damage));
+                this.arrows.push(new arrowObj(this.position.x, this.position.y + this.h, PI*3/4, this.arrowDuration, false, this.velocity.x, this.velocity.y, this.damage));
+                this.arrows.push(new arrowObj(this.position.x, this.position.y, PI*5/4, this.arrowDuration, false, this.velocity.x, this.velocity.y, this.damage));
+                this.arrows.push(new arrowObj(this.position.x + this.w, this.position.y, PI*7/4, this.arrowDuration, false, this.velocity.x, this.velocity.y, this.damage));
+            }
+
+
+        }
+
+        if (this.position.x <= 115 || this.position.x + this.w >= 675 || this.position.y <= 100 || this.position.y + this.h >= 475) {
+            // collision detected!
+            //text("HIT!",200,200);
+            if (this.position.x < 115){
+                this.xdir *= -1;
+            }
+            if (this.position.x + this.w > 675){
+                this.xdir *= -1;
+            }
+            if (this.position.y < 100){
+                this.ydir *= -1;
+            }
+            if (this.position.y + this.h > 475){
+                this.ydir *= -1;
+            }
+        }
+        this.position.x += this.speed*this.xdir;
+        this.position.y += this.speed*this.ydir;
     };
 
     archerObj.prototype.draw = function(){
+
+        if (this.currFrameCount === 0){
+            this.drawn = true;
+            this.currFrameCount = frameCount;
+        }
+
         if (this.hit){
-            //tint(255, 0,0,250);
-            noStroke();
-            fill(255,0,0,50);
-            image(archerImg, this.position.x, this.position.y, this.w, this.h);
-            rect(this.position.x, this.position.y, this.w, this.h, 20);
-            noFill();
-            //noTint();
+            image(archer_hurt, this.position.x, this.position.y, this.w, this.h);
+
             this.hitTime++;
             if (this.hitTime === 5){
                 this.hit = 0;
@@ -1223,7 +1394,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     };
 
     archerObj.prototype.shoot = function(){
-        if (this.currFrameCount < (frameCount - this.shotSpeed)) {
+        if (this.currFrameCount < (frameCount - this.shotSpeed - this.pausedTime) && this.drawn) {
+            this.pausedTime = 0;
             if (soundBool === 1) {
                 shootSound.play();
             }
@@ -1276,13 +1448,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     knightObj.prototype.draw = function(){
         if (this.hit){
-            //tint(255, 0,0,250);
-            noStroke();
-            fill(255,0,0,50);
-            image(knightImg, this.position.x, this.position.y, this.w, this.h);
-            rect(this.position.x, this.position.y, this.w, this.h, 20);
-            noFill();
-            //noTint();
+            image(knight_hurt, this.position.x, this.position.y, this.w, this.h);
+
             this.hitTime++;
             if (this.hitTime === 5){
                 this.hit = 0;
@@ -1364,18 +1531,23 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     };
 
     eyeballObj.prototype.move = function(){
-        if (this.life === this.maxLife*4/5){
+
+        if (this.life <= this.maxLife && this.life >= this.maxLife*4/5){
+            this.speed = 1.5
+        }
+        if (this.life < this.maxLife*4/5 && this.life >= this.maxLife*3/5){
             this.speed = 2
         }
-        if (this.life === this.maxLife*3/5){
+        if (this.life < this.maxLife*3/5 && this.life >= this.maxLife*2/5){
             this.speed = 2.5
         }
-        if (this.life === this.maxLife*2/5){
+        if (this.life < this.maxLife*2/5 && this.life >= this.maxLife*1/5){
             this.speed = 3
         }
-        if (this.life === this.maxLife*1/5){
+        if (this.life < this.maxLife*1/5){
             this.speed = 4
         }
+
         if (this.position.x <= 115 || this.position.x + this.w >= 675 || this.position.y <= 100 || this.position.y + this.h >= 475) {
             // collision detected!
             //text("HIT!",200,200);
@@ -1402,13 +1574,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             this.moveTime = frameCount;
         }
         if (this.hit){
-            //tint(255, 0,0,250);
-            noStroke();
-            fill(255,0,0,50);
-            image(ratImg, this.position.x, this.position.y, this.w, this.h);
-            rect(this.position.x, this.position.y, this.w, this.h, 50);
-            noFill();
-            //noTint();
+            image(rat_hurt, this.position.x, this.position.y, this.w, this.h);
+
             this.hitTime++;
             if (this.hitTime === 5){
                 this.hit = 0;
@@ -1480,15 +1647,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         noFill();
         //rect(this.position.x +12, this.position.y, 30, this.h);
         if (this.hit){
-            //text("HIT!", 400, 400);
-            //tint(255,0,0,250);
-            noStroke();
-            fill(255,0,0,50);
             //rect(this.position.x, this.position.y, this.w, this.h);
-            image(playerImg, this.position.x, this.position.y, this.w, this.h);
-            rect(this.position.x+15, this.position.y, 20, this.h);
-            noFill();
-            //noTint();
+            image(player_hurt, this.position.x, this.position.y, this.w, this.h);
+
             this.hitCount++;
             if (this.hitCount === 10){
                 this.hit = 0;
@@ -1738,13 +1899,13 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         if(this.reset === 1) {
             gamestate.level = level0;
             //l01.enemies = [new ratObj(400, 200), new ratObj(300, 200), new ratObj(250, 300)];
-            l01.enemies = [new knightObj(400, 200)];
+            l01.enemies = [new ratObj(400, 200), new ratObj(300, 200)];
             l02.enemies = [new ratObj(400, 200), new ratObj(300, 200)];
             l03.enemies = [new eyeballObj(400, 300)];
-            l04.enemies = [new archerObj(500, 200)];
-            l05.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
+            l04.enemies = [new ratObj(400, 200), new ratObj(300, 200),new ratObj(200, 300)];
+            l05.enemies = [new ratObj(200, 200), new ratObj(400, 300)];
             l06.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
-            l07.enemies = [new ratObj(500, 200), new ratObj(500, 300)];
+            l07.enemies = [new knightObj(200, 200), new knightObj(600, 200)];
             l01.rolled = false;
             l02.rolled = false;
             l03.rolled = false;
@@ -1761,6 +1922,30 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             l06.loot = [];
             l07.loot = [];
             l08.loot = [];
+
+            l11.enemies = [new knightObj(400, 200), new knightObj(400, 350)];
+            l12.enemies = [new ratObj(400, 200), new ratObj(300, 200), new ratObj(400, 300), new ratObj(300, 300)];
+            l13.enemies = [new knightObj(200, 350), new knightObj(400, 350), new ratObj(300, 200)];
+            l14.enemies = [new archerObj(375, 150), new archerObj(375, 400)];
+            l15.enemies = [new archerObj(400, 300), new knightObj(200, 300)];
+            l16.enemies = [new archerObj(500, 300), new knightObj(400, 300), new archerObj(200, 300)];
+            l18.enemies = [new acidObj(350, 130)];
+            l11.rolled = false;
+            l12.rolled = false;
+            l13.rolled = false;
+            l14.rolled = false;
+            l15.rolled = false;
+            l16.rolled = false;
+            l17.rolled = false;
+            l18.rolled = false;
+            l11.loot = [];
+            l12.loot = [];
+            l13.loot = [];
+            l14.loot = [];
+            l15.loot = [];
+            l16.loot = [];
+            l17.loot = [];
+            l18.loot = [];
             resetItems();
 
             for(var i = 0; i < this.level.layout.length; ++i) {
@@ -1871,11 +2056,10 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     /*  LOOT SYSTEM AND ITEMS  */
 
-    var itemObj = function(name, img, stat, color){
+    var itemObj = function(name, img, stat){
         this.name = name;
         this.img = img;
         this.stat = stat;
-        this.color = color;
 
         if(stat === "stairs"){
             this.x = 625;
@@ -1898,25 +2082,23 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
     };
 
     var allItems = [];
-    var health = new itemObj("Health", 0, "health", [255,0,0]);
-    var damage = new itemObj("Damage", 0, "damage", [102,0,204]);
-    var speed = new itemObj("Speed", 0, "speed", [255,255,255]);
-    var shotSpeed = new itemObj("Shot Speed", 0, "shotSpeed", [255,255,0]);
-    var shotLength = new itemObj("Shot Length", 0, "shotLength", [0,128,255]);
-    var luck = new itemObj("Luck", 0, "luck", [0,153,0]);
 
-    var potion = new itemObj("Health Potion", potionImg, "potion", [0,0,0]);
-    var stairs = new itemObj("Stairs", stairIMG, "stairs", [0,0,0]);
+    //var stairs = new itemObj("Stairs", stairIMG, "stairs");
 
     var resetItems = function(){
-        allItems = [health, damage, speed, shotSpeed, shotLength, luck];
+        allItems = [new itemObj("Heart Crystal", health1, "health"), new itemObj("Medical Supplies", health2, "health"),
+                    new itemObj("Holy Crossbow", damage1, "damage"), new itemObj("Crossbow String", damage2, "damage"),
+                    new itemObj("Weight Reduction", speed1, "speed"), new itemObj("Hermes Boots", speed2, "speed"),
+                    new itemObj("Double Tap", shotspeed1, "shotSpeed"), new itemObj("Cartridges", shotspeed2, "shotSpeed"),
+                    new itemObj("Distance Up", distance1, "shotLength"), new itemObj("Rocket Arrows", distance2, "shotLength"),
+                    new itemObj("4 Leaf Clover", luck1, "luck"), new itemObj("Lucky Dice", luck2, "luck")];
     };
 
     itemObj.prototype.drawName = function(){
         fill(130, 130, 130);
         strokeWeight(1);
         stroke(0,0,0);
-        rect(200, 100, 400, 100, 50);
+        rect(150, 100, 500, 100, 50);
 
         textAlign(CENTER);
         textSize(50);
@@ -1976,10 +2158,12 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                     this.available = false;
                     this.splice = true;
                 } else if(gamestate.level === level1) {
-                    gamestate.level = level2;
+
+                    //gamestate.level = level2;
                     player.position = new PVector(375, 275);
                     this.available = false;
                     this.splice = true;
+                    state = "win";
                 }
             }
             else{
@@ -2021,6 +2205,8 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         if (this.available){
             //console.log("DRAWING ITEM ", this.name);
             //image(img, this.x, this.y, this.w, this.h);
+            image(this.img, this.x, this.y, this.w, this.h);
+            /*
             stroke(0,0,0);
             strokeWeight(1);
             if (this.stat !== "potion" && this.stat !== "stairs") {
@@ -2031,6 +2217,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             else{
                 image(this.img, this.x, this.y, this.w, this.h);
             }
+            */
 
             this.checkCollected();
         }
@@ -2168,6 +2355,37 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     };
 
+    var drawWin = function () {
+        stroke(0,0,0);
+        strokeWeight(5);
+        fill(130,130,130);
+        rect(100, 100, 600, 400, 20);
+        textSize(64);
+        textAlign(CENTER);
+        fill(0,0,0);
+        text("YOU WIN!",400, 175);
+        image(playerImg, 125, 325, 150, 150);
+
+        textSize(24);
+        //STATS
+        text("Damage: " + player.damage,250, 215);
+        text("Speed: " + player.maxSpeed,250, 245);
+        text("Shot Speed: " + 1/(player.shotSpeed/60),250, 275);
+
+        text("Max Health: " + player.maxLife,550, 215);
+        text("Shot Length: " + player.arrowDuration,550, 245);
+        text("Luck: " + player.luck + "%",550, 275);
+
+
+        textSize(32);
+        text("Main Menu\nEnter", 550, 450);
+
+        textAlign(LEFT);
+
+
+        gamestate.reset = 1;
+    };
+
 
     /* Main Draw and Key Input Area */
 
@@ -2253,6 +2471,11 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                         player.arrows[i].pausedCurrFrame = frameCount;
                     }
                     for(var i=0; i<gamestate.currRoom.enemies.length; i++){
+                        if (gamestate.currRoom.enemies[i].arrowBool){
+                             for(var e=0; e<gamestate.currRoom.enemies[i].arrows.length; e++) {
+                                gamestate.currRoom.enemies[i].arrows[e].pausedCurrFrame = frameCount;
+                             }
+                        }
                         gamestate.currRoom.enemies[i].pausedCurrFrame = frameCount;
                     }
                     state = "paused";
@@ -2283,6 +2506,11 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 }
                 break;
             case "gameover":
+                if (keyCode === ENTER) {
+                    state = "menu";
+                }
+                break;
+            case "win":
                 if (keyCode === ENTER) {
                     state = "menu";
                 }
@@ -2326,6 +2554,11 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                                 player.arrows[i].pausedTime = frameCount - player.arrows[i].pausedCurrFrame;
                             }
                             for(var i=0; i<gamestate.currRoom.enemies.length; i++){
+                                if (gamestate.currRoom.enemies[i].arrowBool){
+                                     for(var e=0; e<gamestate.currRoom.enemies[i].arrows.length; e++) {
+                                        gamestate.currRoom.enemies[i].arrows[e].pausedTime = frameCount - gamestate.currRoom.enemies[i].arrows[e].pausedCurrFrame;
+                                     }
+                                }
                                 gamestate.currRoom.enemies[i].pausedTime = frameCount - gamestate.currRoom.enemies[i].pausedCurrFrame;
                             }
                             state = "game";
@@ -2493,6 +2726,9 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 break;
             case "gameover":
                 drawGameOver();
+                break;
+            case "win":
+                drawWin();
                 break;
             case "paused":
                 drawPauseScreen();
