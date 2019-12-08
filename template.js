@@ -1736,6 +1736,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
 
     map_data.prototype.resetGame = function() {
         if(this.reset === 1) {
+            gamestate.level = level0;
             //l01.enemies = [new ratObj(400, 200), new ratObj(300, 200), new ratObj(250, 300)];
             l01.enemies = [new knightObj(400, 200)];
             l02.enemies = [new ratObj(400, 200), new ratObj(300, 200)];
@@ -1761,6 +1762,18 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             l07.loot = [];
             l08.loot = [];
             resetItems();
+
+            for(var i = 0; i < this.level.layout.length; ++i) {
+                for(var j = 0; j < this.level.layout[0].length; ++j) {
+                    var room = this.level.layout[i][j];
+                    if (room != 9) {
+                        if (this.level.rooms[room].seen) {
+                            this.level.rooms[room].seen = false;
+                        }
+                    }
+                }
+            }
+
             player = new playerObj(375, 275);
             this.level.playerRoomLocation = new PVector(2,2);
             this.reset = 0;
@@ -1846,21 +1859,6 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                             fill(255, 0, 0);
                             noStroke();
                             ellipse(j*20 + 685, i*20 + 46, 5, 5);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    minimap.prototype.reset = function() {
-        if(gamestate.reset) {
-            for(var i = 0; i < gamestate.level.layout.length; ++i) {
-                for(var j = 0; j < gamestate.level.layout[0].length; ++j) {
-                    var room = gamestate.level.layout[i][j];
-                    if (room != 9) {
-                        if (gamestate.level.rooms[room].seen) {
-                            gamestate.level.rooms[room].seen = false;
                         }
                     }
                 }
@@ -2488,7 +2486,6 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 player.checkDoors();
                 mmap.bfs();
                 mmap.show();
-                mmap.reset();
                 break;
             case "test":
                 gamestate.run();
