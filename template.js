@@ -1760,17 +1760,116 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             l06.loot = [];
             l07.loot = [];
             l08.loot = [];
-
-
             resetItems();
             player = new playerObj(375, 275);
             this.level.playerRoomLocation = new PVector(2,2);
             this.reset = 0;
         }
     }
-    //l00.enemies = [new eyeballObj(400,300)];
 
     var gamestate = new map_data(level0);
+
+        /*  MINI MAP */
+
+    var minimap = function() {
+        this.level = gamestate.level.layout;
+    }
+
+    minimap.prototype.bfs = function() {
+        /*
+        this.roomSpot = this.level.layout[this.level.playerRoomLocation.x][this.level.playerRoomLocation.y];
+        this.currRoom = this.level.rooms[this.roomSpot];
+         */
+        if(!gamestate.currRoom.seen) {
+            gamestate.currRoom.seen = true;
+        }
+        //bfs of depth 1
+        //safeguarding against accessing array locations that dont exist
+        if(gamestate.level.playerRoomLocation.x != 0) {
+            var north = gamestate.level.layout[gamestate.level.playerRoomLocation.x-1][gamestate.level.playerRoomLocation.y];
+            if(north != 9) {
+                //console.log("NORTH: " + gamestate.level.rooms[north].seen);
+                if(!gamestate.level.rooms[north].seen) {
+                    gamestate.level.rooms[north].seen = true;
+                }
+            }
+        }
+        if(gamestate.level.playerRoomLocation.x != gamestate.level.layout.length - 1) {
+            var south = gamestate.level.layout[gamestate.level.playerRoomLocation.x+1][gamestate.level.playerRoomLocation.y];
+            if(south != 9) {
+               //console.log("SOUTH: " + gamestate.level.rooms[south].seen);
+                if(!gamestate.level.rooms[south].seen) {
+                    gamestate.level.rooms[south].seen = true;
+                }
+            }
+        }
+        if(gamestate.level.playerRoomLocation.y != gamestate.level.layout[0].length - 1) {
+            var east = gamestate.level.layout[gamestate.level.playerRoomLocation.x][gamestate.level.playerRoomLocation.y + 1];
+            if(east != 9) {
+                //console.log("EAST: " + gamestate.level.rooms[east].seen);
+                if(!gamestate.level.rooms[east].seen) {
+                    gamestate.level.rooms[east].seen = true;
+                }
+            }
+        }
+        if(gamestate.level.playerRoomLocation.y != 0) {
+            var west = gamestate.level.layout[gamestate.level.playerRoomLocation.x][gamestate.level.playerRoomLocation.y-1];
+            if(west != 9) {
+                //console.log("WEST: " + gamestate.level.rooms[west].seen);
+                if(!gamestate.level.rooms[west].seen) {
+                    gamestate.level.rooms[west].seen = true;
+                }
+            }
+        }
+    }
+
+    minimap.prototype.show = function() {
+        for(var i = 0; i < gamestate.level.layout.length; ++i) {
+            for(var j = 0; j < gamestate.level.layout[0].length; ++j) {
+                var room = gamestate.level.layout[i][j];
+                if(room != 9) {
+                    if(gamestate.level.rooms[room].seen) {
+                        //console.log("HERE");
+                        noFill();
+                        stroke(255, 255, 255);
+                        strokeWeight(1);
+                        rect(j*20 + 675, i*20 + 35, 20, 20, 5);
+                        if(gamestate.level.rooms[room].boss) {
+                            //draw boss
+                            image(skullIMG, j*20 + 678, i*20 + 38, 15, 15);
+                        }
+                        if(gamestate.level.rooms[room].loot.length > 0 || (gamestate.level.rooms[room].trophy && gamestate.level.rooms[room].loot.length > 0)) {
+                            //draw loot symbol
+                            image(trophyIMG, j*20 + 678, i*20 + 39, 15, 15);
+                        }
+                        if(i == gamestate.level.playerRoomLocation.x && j == gamestate.level.playerRoomLocation.y) {
+                            fill(255, 0, 0);
+                            noStroke();
+                            ellipse(j*20 + 685, i*20 + 46, 5, 5);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    minimap.prototype.reset = function() {
+        if(gamestate.reset) {
+            for(var i = 0; i < gamestate.level.layout.length; ++i) {
+                for(var j = 0; j < gamestate.level.layout[0].length; ++j) {
+                    var room = gamestate.level.layout[i][j];
+                    if (room != 9) {
+                        if (gamestate.level.rooms[room].seen) {
+                            gamestate.level.rooms[room].seen = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    var mmap = new minimap();
+    /*  END MINI MAP */
 
     /*  LOOT SYSTEM AND ITEMS  */
 
@@ -1953,95 +2052,6 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             }
         }
     };
-
-
-
-    /*  MINI MAP */
-
-    var minimap = function() {
-        this.level = gamestate.level.layout;
-    }
-
-    minimap.prototype.bfs = function() {
-        /*
-        this.roomSpot = this.level.layout[this.level.playerRoomLocation.x][this.level.playerRoomLocation.y];
-        this.currRoom = this.level.rooms[this.roomSpot];
-         */
-        if(!gamestate.currRoom.seen) {
-            gamestate.currRoom.seen = true;
-        }
-        //bfs of depth 1
-        //safeguarding against accessing array locations that dont exist
-        if(gamestate.level.playerRoomLocation.x != 0) {
-            var north = gamestate.level.layout[gamestate.level.playerRoomLocation.x-1][gamestate.level.playerRoomLocation.y];
-            if(north != 9) {
-                //console.log("NORTH: " + gamestate.level.rooms[north].seen);
-                if(!gamestate.level.rooms[north].seen) {
-                    gamestate.level.rooms[north].seen = true;
-                }
-            }
-        }
-        if(gamestate.level.playerRoomLocation.x != gamestate.level.layout.length - 1) {
-            var south = gamestate.level.layout[gamestate.level.playerRoomLocation.x+1][gamestate.level.playerRoomLocation.y];
-            if(south != 9) {
-               //console.log("SOUTH: " + gamestate.level.rooms[south].seen);
-                if(!gamestate.level.rooms[south].seen) {
-                    gamestate.level.rooms[south].seen = true;
-                }
-            }
-        }
-        if(gamestate.level.playerRoomLocation.y != gamestate.level.layout[0].length - 1) {
-            var east = gamestate.level.layout[gamestate.level.playerRoomLocation.x][gamestate.level.playerRoomLocation.y + 1];
-            if(east != 9) {
-                //console.log("EAST: " + gamestate.level.rooms[east].seen);
-                if(!gamestate.level.rooms[east].seen) {
-                    gamestate.level.rooms[east].seen = true;
-                }
-            }
-        }
-        if(gamestate.level.playerRoomLocation.y != 0) {
-            var west = gamestate.level.layout[gamestate.level.playerRoomLocation.x][gamestate.level.playerRoomLocation.y-1];
-            if(west != 9) {
-                //console.log("WEST: " + gamestate.level.rooms[west].seen);
-                if(!gamestate.level.rooms[west].seen) {
-                    gamestate.level.rooms[west].seen = true;
-                }
-            }
-        }
-    }
-    
-    minimap.prototype.show = function() {
-        for(var i = 0; i < gamestate.level.layout.length; ++i) {
-            for(var j = 0; j < gamestate.level.layout[0].length; ++j) {
-                var room = gamestate.level.layout[i][j];
-                if(room != 9) {
-                    if(gamestate.level.rooms[room].seen) {
-                        //console.log("HERE");
-                        noFill();
-                        stroke(255, 255, 255);
-                        strokeWeight(1);
-                        rect(j*20 + 675, i*20 + 35, 20, 20, 5);
-                        if(gamestate.level.rooms[room].boss) {
-                            //draw boss
-                            image(skullIMG, j*20 + 678, i*20 + 38, 15, 15);
-                        }
-                        if(gamestate.level.rooms[room].loot.length > 0 || (gamestate.level.rooms[room].trophy && gamestate.level.rooms[room].loot.length > 0)) {
-                            //draw loot symbol
-                            image(trophyIMG, j*20 + 678, i*20 + 39, 15, 15);
-                        }
-                        if(i == gamestate.level.playerRoomLocation.x && j == gamestate.level.playerRoomLocation.y) {
-                            fill(255, 0, 0);
-                            noStroke();
-                            ellipse(j*20 + 685, i*20 + 46, 5, 5);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    var mmap = new minimap();
-    /*  END MINI MAP */
 
     var drawTest = function () {
         /*
@@ -2478,6 +2488,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
                 player.checkDoors();
                 mmap.bfs();
                 mmap.show();
+                mmap.reset();
                 break;
             case "test":
                 gamestate.run();
