@@ -792,6 +792,7 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
         text("WASD to Move", 400, 120);
         text("Arrow Keys to Shoot", 400, 180);
         image(instructionImg, 50, 200, 700, 250);
+        text("Press P to Pause Game", 400, 500);
         text("Press Enter to Return to Main Menu", 400, 550);
         textAlign(LEFT);
     }
