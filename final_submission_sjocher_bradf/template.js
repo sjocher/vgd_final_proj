@@ -1946,8 +1946,6 @@ var sketchProc=function(processingInstance){ with (processingInstance) {
             l16.loot = [];
             l17.loot = [];
             l18.loot = [];
-            level0.playerRoomLocation = new PVector(2, 2);
-            level1.playerRoomLocation = new PVector(2, 3);
             resetItems();
 
             for(var i = 0; i < this.level.layout.length; ++i) {
